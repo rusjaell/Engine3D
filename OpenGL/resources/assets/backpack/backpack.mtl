@@ -1,0 +1,12 @@
+newmtl object_0
+Ka 0.000000 0.000000 0.000000
+Kd 0.698039 0.698039 0.698039
+Ks 0.000000 0.000000 0.000000
+d 1.000000
+illum 2
+Ns 9.84916
+map_Kd RGB_5e1511032a574de0a89e2d26e9416a9c_1001_albedo.jpeg
+map_Pr R_3e1e6f67ea5a4fc2ae94d382966dfcc7_1001_roughness.jpeg
+map_Pm R_c14b5db493be4de6a4fccc0fad9e5409_1001_metallic.jpeg
+map_Ka R_b66f782ca24b41a2913f91d1e43a87f3_1001_AO.jpeg
+map_Bump N_92969211913e441d869ed5fbb5f8043c_1001_normal.jpeg
