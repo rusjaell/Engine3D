@@ -13,17 +13,14 @@ Shared<Shader> modelShader_;
 
 Shared<Model> model_;
 Shared<Model> backpack_;
-Shared<Model> column_;
-Shared<Model> floor_;
 
 Scene::Scene()
 {
     modelShader_ = ShaderLibrary::LoadShader("default", "resources/shaders/default.vert", "resources/shaders/default.frag");
 
-    model_ = ModelLibrary::LoadModel("sponza", "resources/assets/sponza/sponza.obj");
-    backpack_ = ModelLibrary::LoadModel("backpack", "resources/assets/backpack/backpack.obj");
-    column_ = ModelLibrary::LoadModel("column", "resources/models/column.obj");
-    floor_ = ModelLibrary::LoadModel("floor", "resources/models/floor.obj");
+    //model_ = ModelLibrary::LoadModel("sponza", "resources/assets/sponza/sponza.obj");
+    model_ = ModelLibrary::LoadModel("backpack", "resources/assets/backpack/backpack.obj");
+    backpack_ = ModelLibrary::LoadModel("helmet", "resources/assets/damaged_helmet/DamagedHelmet.gltf");
 }
 
 Scene::~Scene()
@@ -105,22 +102,31 @@ void Scene::OnRender(double time, double dt)
     glm::mat4 model(1.0);
     model = glm::scale(model, glm::vec3 { 0.00625f });
     modelShader_->SetUniformMatrix4f("u_Model", model);
+
     model_->Draw(modelShader_);
 
-    for (int x = 0; x < 8; x++) {
-        for (int y = 0; y < 8; y++) {
-            for (int z = 0; z < 8; z++) {
+    model = glm::mat4(1.0);
+    model = glm::translate(model, glm::vec3(5, 0, 0));
+    model = glm::scale(model, glm::vec3{ 1 });
 
-                model = glm::mat4(1.0);
-                model = glm::translate(model, glm::vec3(x - 4, y + 12, z - 4));
-                model = glm::scale(model, glm::vec3{ 0.00625f / 4 });
+    modelShader_->SetUniformMatrix4f("u_Model", model);
+    backpack_->Draw(modelShader_);
 
-                modelShader_->SetUniformMatrix4f("u_Model", model);
+    //for (int x = 0; x < 8; x++) {
+    //    for (int y = 0; y < 8; y++) {
+    //        for (int z = 0; z < 8; z++) {
 
-                backpack_->Draw(modelShader_);
-            }
-        }
-    }
+    //            model = glm::mat4(1.0);
+    //            model = glm::translate(model, glm::vec3(x - 4, y + 12, z - 4));
+    //            //model = glm::scale(model, glm::vec3{ 0.00625f / 4 });
+    //            model = glm::scale(model, glm::vec3{ 0.5f / 4 });
+
+    //            modelShader_->SetUniformMatrix4f("u_Model", model);
+
+    //            backpack_->Draw(modelShader_);
+    //        }
+    //    }
+    //}
 }
 
 

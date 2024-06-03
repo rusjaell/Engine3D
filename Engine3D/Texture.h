@@ -4,11 +4,12 @@
 class Texture
 {
 public:
-	Texture(const std::string& type, const std::string& filePath);
-	Texture(std::string& type, unsigned int width, unsigned int height);
+	Texture(const std::string& filePath);
+	Texture(unsigned int width, unsigned int height);
 	~Texture();
 
 	void Bind(unsigned int slot = 0) const;
+	void Unbind(unsigned int slot = 0) const;
 
 	void SetDataRGBA(void* data, unsigned int size);
 
@@ -16,7 +17,6 @@ public:
 	unsigned int width() const;
 	unsigned int height() const;
 	stbi_uc* data() const;
-	const std::string& type() const;
 
 	bool operator==(const Texture& other);
 
@@ -29,7 +29,6 @@ private:
 	GLenum internalformat_;
 	GLenum dataFormat_;
 	stbi_uc* data_;
-	std::string type_;
 };
 
 #endif // !TEXTURE_H

@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "Texture.h"
 
-Texture::Texture(const std::string& type, const std::string& filePath)
-	: id_(0), width_(0), height_(0), channels_(0), type_(type)
+Texture::Texture(const std::string& filePath)
+	: id_(0), width_(0), height_(0), channels_(0)
 {
 	stbi_set_flip_vertically_on_load(1);
 
@@ -61,8 +61,8 @@ Texture::Texture(const std::string& type, const std::string& filePath)
 	stbi_image_free(data_);
 }
 
-Texture::Texture(std::string& type, unsigned int width, unsigned int height)
-	: type_(type), id_(0), width_(width), height_(height), channels_(0), data_(NULL)
+Texture::Texture(unsigned int width, unsigned int height)
+	: id_(0), width_(width), height_(height), channels_(0), data_(NULL)
 {
 	internalformat_ = GL_RGBA8;
 	dataFormat_ = GL_RGBA;
@@ -87,6 +87,11 @@ void Texture::Bind(unsigned int slot) const
 	glBindTextureUnit(slot, id_);
 }
 
+void Texture::Unbind(unsigned int slot) const
+{
+	glBindTextureUnit(slot, 0);
+}
+
 void Texture::SetDataRGBA(void* data, unsigned int size)
 {
 	assert(size == width_ * height_ * 4, "Data must be entire texture!");
@@ -108,11 +113,6 @@ unsigned int Texture::height() const {
 stbi_uc* Texture::data() const
 {
 	return data_;
-}
-
-const std::string& Texture::type() const
-{
-	return type_;
 }
 
 bool Texture::operator==(const Texture& other)

@@ -15,6 +15,8 @@ Shared<Model> ModelLibrary::GetModel(const std::string& name)
 
 Shared<Model> ModelLibrary::LoadModel(const std::string& name, const std::string& path)
 {
+    loadedTextures_.clear();
+
     if (loadedModels_.find(name) != loadedModels_.end()) {
         std::cout << "Model with name: " << name << " has already been loaded\n";
         return nullptr;
@@ -112,58 +114,71 @@ Mesh ModelLibrary::ProcessMesh(const std::string& directory, const Shared<Model>
         // process materials
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-        // 1. diffuse maps
-        std::vector<Shared<Texture>> diffuseMaps = LoadMaterialTextures(directory, material, aiTextureType_DIFFUSE, "u_Albedo");
-        if (diffuseMaps.size() > 1) {
-            std::cout << "MULTIPLE DIFFUSES\n";
-        }
-        else  if (diffuseMaps.size() == 0) {
-        }
-        else {
-            m->diffuseMap = diffuseMaps[0];
+        std::cout << '\n';
+        int count = material->GetTextureCount(aiTextureType_DIFFUSE);
+        std::cout << "aiTextureType_DIFFUSE: " << count << '\n';
+
+        count = material->GetTextureCount(aiTextureType_SPECULAR);
+        std::cout << "aiTextureType_SPECULAR: " << count << '\n';
+
+        count = material->GetTextureCount(aiTextureType_AMBIENT);
+        std::cout << "aiTextureType_AMBIENT: " << count << '\n';
+
+        count = material->GetTextureCount(aiTextureType_EMISSIVE);
+        std::cout << "aiTextureType_EMISSIVE: " << count << '\n';
+
+        count = material->GetTextureCount(aiTextureType_HEIGHT);
+        std::cout << "aiTextureType_HEIGHT: " << count << '\n';
+
+        count = material->GetTextureCount(aiTextureType_NORMALS);
+        std::cout << "aiTextureType_NORMALS: " << count << '\n';
+
+        count = material->GetTextureCount(aiTextureType_SHININESS);
+        std::cout << "aiTextureType_SHININESS: " << count << '\n';
+
+        count = material->GetTextureCount(aiTextureType_OPACITY);
+        std::cout << "aiTextureType_OPACITY: " << count << '\n';
+
+        count = material->GetTextureCount(aiTextureType_DISPLACEMENT);
+        std::cout << "aiTextureType_DISPLACEMENT: " << count << '\n';
+
+        count = material->GetTextureCount(aiTextureType_UNKNOWN);
+        std::cout << "aiTextureType_UNKNOWN: " << count << '\n';
+
+        // Albedo map (diffuse texture)
+        aiString path;
+        if (material->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS) {
+            m->albedoMap = MakeShared<Texture>(directory + "/" + path.C_Str());
         }
 
-        // 2. specular maps
-        std::vector<Shared<Texture>> specularMaps = LoadMaterialTextures(directory, material, aiTextureType_SPECULAR, "u_Specular");
-        if (specularMaps.size() > 1) {
-            std::cout << "MULTIPLE SPECULAR\n";
-        }
-        else  if (specularMaps.size() == 0){
-        }
-        else {
-            m->specularMap = specularMaps[0];
+        // Roughness map
+        if (material->GetTexture(aiTextureType_SHININESS, 0, &path) == AI_SUCCESS) {
+            m->roughnessMap = MakeShared<Texture>(directory + "/" + path.C_Str());
         }
 
-        // 3. normal maps
-        std::vector<Shared<Texture>> normalMaps = LoadMaterialTextures(directory, material, aiTextureType_HEIGHT, "u_Normal");
-        if (normalMaps.size() > 1) {
-            std::cout << "MULTIPLE NORMAL\n";
-        }
-        else  if (normalMaps.size() == 0) {
-        }
-        else {
-            m->normalMap = normalMaps[0];
+        // Normal map
+        if (material->GetTexture(aiTextureType_NORMALS, 0, &path) == AI_SUCCESS) {
+            m->normalMap = MakeShared<Texture>(directory + "/" + path.C_Str());
         }
 
-        // 4. height maps
-        std::vector<Shared<Texture>> ambientHeightMaps = LoadMaterialTextures(directory, material, aiTextureType_AMBIENT, "u_Ambient");
-        if (ambientHeightMaps.size() > 1) {
-            std::cout << "MULTIPLE AMBIENT HEIGHT\n";
-        }
-        else  if (ambientHeightMaps.size() == 0) {
-        }
-        else {
-            m->ambientHeightMap = ambientHeightMaps[0];
+        // Ambient occlusion map
+        if (material->GetTexture(aiTextureType_AMBIENT, 0, &path) == AI_SUCCESS) {
+            m->ambientOcclusionMap = MakeShared<Texture>(directory + "/" + path.C_Str());
         }
 
-        if (aiGetMaterialFloat(material, AI_MATKEY_SHININESS, &m->shininess) != AI_SUCCESS) 
-        {
-            m->shininess = 0.0f;
+        // Specular map
+        if (material->GetTexture(aiTextureType_SPECULAR, 0, &path) == AI_SUCCESS) {
+            m->specularMap = MakeShared<Texture>(directory + "/" + path.C_Str());
+        }
+
+        // Metallic map
+        if (material->GetTexture(aiTextureType_METALNESS, 0, &path) == AI_SUCCESS) {
+            m->metallicMap = MakeShared<Texture>(directory + "/" + path.C_Str());
         }
 
         aiColor4D diffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
         aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &diffuseColor);
-        m->defaultDiffuseColor = { diffuseColor.r, diffuseColor.g, diffuseColor.b, diffuseColor.a };
+        m->defaultAlbedoColor = { diffuseColor.r, diffuseColor.g, diffuseColor.b, diffuseColor.a };
 
         aiColor4D ambientColor(1.0f, 1.0f, 1.0f, 1.0f);
         aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, &ambientColor);
@@ -180,30 +195,5 @@ Mesh ModelLibrary::ProcessMesh(const std::string& directory, const Shared<Model>
 
 std::vector<Shared<Texture>> ModelLibrary::LoadMaterialTextures(const std::string& directory, aiMaterial* mat, aiTextureType type, std::string typeName)
 {
-    std::vector<Shared<Texture>> textures;
-
-    for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
-
-        aiString str;
-        mat->GetTexture(type, i, &str);
-
-        // check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
-        bool skip = false;
-        for (unsigned int j = 0; j < loadedTextures_.size(); j++) {
-            if (std::strcmp(loadedTextures_[j]->type().data(), str.C_Str()) == 0) {
-                textures.push_back(loadedTextures_[j]);
-                skip = true;
-                break;
-            }
-        }
-
-        if (!skip) {
-            std::string path = directory + "/" + str.C_Str();
-
-            Shared<Texture> texture = MakeShared<Texture>(typeName, path);
-            textures.push_back(texture);
-            loadedTextures_.push_back(texture);
-        }
-    }
-    return textures;
+    return {};
 }
