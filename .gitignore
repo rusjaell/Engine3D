@@ -1049,5 +1049,3 @@ dkms.conf
 !Dependencies/**
 !Engine3D/Resources/
 !Engine3D/Resources/**
-!Engine3D/resources/
-!Engine3D/resources/**
