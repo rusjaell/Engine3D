@@ -51,6 +51,12 @@
     <Filter Include="Source Files\Editor">
       <UniqueIdentifier>{880496a4-a1af-4d76-823a-3814c8413537}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Engine\Assets">
+      <UniqueIdentifier>{2123e94b-fe54-42f7-a94f-2210b055fa36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Engine\Runtime">
+      <UniqueIdentifier>{824f9fd1-f51d-4986-a3b3-26ec010bfb97}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -98,9 +104,6 @@
     <ClCompile Include="Window.cpp">
       <Filter>Source Files\Engine\Window</Filter>
     </ClCompile>
-    <ClCompile Include="Shader.cpp">
-      <Filter>Source Files\Engine\Renderer\Shaders</Filter>
-    </ClCompile>
     <ClCompile Include="Texture.cpp">
       <Filter>Source Files\Engine\Renderer\Texture</Filter>
     </ClCompile>
@@ -122,9 +125,6 @@
     <ClCompile Include="Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>Source Files\Editor</Filter>
-    </ClCompile>
     <ClCompile Include="ImGUIOverlay.cpp">
       <Filter>Source Files\Engine\Debug</Filter>
     </ClCompile>
@@ -140,8 +140,23 @@
     <ClCompile Include="Model.cpp">
       <Filter>Source Files\Engine\Renderer\Models\Data</Filter>
     </ClCompile>
+    <ClCompile Include="AssetLibrary.cpp">
+      <Filter>Source Files\Engine\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset.cpp">
+      <Filter>Source Files\Engine\Assets</Filter>
+    </ClCompile>
     <ClCompile Include="Material.cpp">
-      <Filter>Source Files\Engine\Renderer\Models\Data</Filter>
+      <Filter>Source Files\Engine\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Source Files\Engine\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor.cpp">
+      <Filter>Source Files\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Source Files\Engine\Runtime</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -198,9 +213,6 @@
     <ClInclude Include="Window.h">
       <Filter>Source Files\Engine\Window</Filter>
     </ClInclude>
-    <ClInclude Include="Shader.h">
-      <Filter>Source Files\Engine\Renderer\Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="Texture.h">
       <Filter>Source Files\Engine\Renderer\Texture</Filter>
     </ClInclude>
@@ -222,9 +234,6 @@
     <ClInclude Include="Application.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>Source Files\Editor</Filter>
-    </ClInclude>
     <ClInclude Include="ImGUIOverlay.h">
       <Filter>Source Files\Engine\Debug</Filter>
     </ClInclude>
@@ -240,8 +249,23 @@
     <ClInclude Include="Model.h">
       <Filter>Source Files\Engine\Renderer\Models\Data</Filter>
     </ClInclude>
+    <ClInclude Include="AssetLibrary.h">
+      <Filter>Source Files\Engine\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset.h">
+      <Filter>Source Files\Engine\Assets</Filter>
+    </ClInclude>
     <ClInclude Include="Material.h">
-      <Filter>Source Files\Engine\Renderer\Models\Data</Filter>
+      <Filter>Source Files\Engine\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Source Files\Engine\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor.h">
+      <Filter>Source Files\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Source Files\Engine\Runtime</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

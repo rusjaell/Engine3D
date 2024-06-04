@@ -3,6 +3,7 @@
 #include "Shader.h"
 #include "Scene.h"
 #include "Input.h"
+#include "Editor.h"
 
 Application* Application::instance_ = nullptr;
 int Application::draws_ = 0;
@@ -17,7 +18,7 @@ Application::Application(const char* title, unsigned int width, unsigned int hei
 	window_->SetEventCallback(BIND_FN(Application::OnEvent));
 
 	imGUIDebug_ = new ImGUIDebug();
-	scene_ = new Scene();
+	scene_ = new Editor();
 }
 
 Application::~Application()

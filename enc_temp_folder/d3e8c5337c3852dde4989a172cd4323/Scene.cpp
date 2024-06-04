@@ -232,8 +232,8 @@ void Scene::OnUpdate(double time, double dt)
 
 void Scene::OnRender(double time, double dt)
 {
-    //glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, 1.0f);
-    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     float fov = glm::radians(camera.Zoom);
     float aspectRatio = (float)width_ / height_;

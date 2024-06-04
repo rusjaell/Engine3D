@@ -3,17 +3,13 @@
 
 #include <glm.hpp>
 
-#include <string>
-#include <fstream>
-#include <sstream> 
-#include <iostream>
-#include <vector>
-#include <unordered_map>
+#include "Asset.h"
 
-class Shader
+class Shader : public Asset
 {
 public:
 	Shader(const char* vertex_file_path, const char* fragment_file_path);
+	virtual ~Shader() = default;
 
 	std::string vertexPath() const;
 	std::string fragmentPath() const;

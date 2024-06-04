@@ -4,6 +4,7 @@
 #include "Window.h"
 #include "ImGuiOverlay.h"
 
+class Editor;
 class Scene;
 class Application
 {
@@ -38,7 +39,7 @@ private:
 	double lastFrameTime_;
 	Window* window_;
 	ImGUIDebug* imGUIDebug_;
-	Scene* scene_;
+	Editor* scene_;
 	bool isRunning_;
 
 	double time_;

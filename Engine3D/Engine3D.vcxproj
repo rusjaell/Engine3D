@@ -177,8 +177,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="Asset.cpp" />
+    <ClCompile Include="AssetLibrary.cpp" />
     <ClCompile Include="Buffers.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Editor.cpp" />
     <ClCompile Include="Event.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="Material.cpp" />
@@ -255,8 +258,11 @@
     <ClInclude Include="..\Dependencies\pugiconfig.hpp" />
     <ClInclude Include="..\Dependencies\pugixml.hpp" />
     <ClInclude Include="Application.h" />
+    <ClInclude Include="Asset.h" />
+    <ClInclude Include="AssetLibrary.h" />
     <ClInclude Include="Buffers.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Editor.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="Material.h" />

@@ -3,8 +3,9 @@
 
 #include "Texture.h"
 #include "Shader.h"
+#include "Asset.h"
 
-struct Material 
+struct Material : public Asset
 {
     void Use(const Shared<Shader>& shader)
     {

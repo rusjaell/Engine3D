@@ -1,7 +1,9 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-class Texture
+#include "Asset.h"
+
+class Texture : public Asset
 {
 public:
 	Texture(const std::string& filePath);
