@@ -33,6 +33,29 @@ Mesh::Mesh(std::vector<VertexData> vertices, std::vector<unsigned int> indices, 
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)offsetof(VertexData, normal));
 
     glBindVertexArray(0);
+
+    CalculateAABB();
+}
+
+void Mesh::CalculateAABB() {
+    if (vertices_.empty()) {
+        aabb_.minPoint = { 0.0f, 0.0f, 0.0f };
+        aabb_.maxPoint = { 0.0f, 0.0f, 0.0f };
+        return;
+    }
+
+    aabb_.minPoint = aabb_.maxPoint = vertices_[0].position;
+
+    for (const auto& vertex : vertices_) 
+    {
+        aabb_.minPoint.x = std::min(aabb_.minPoint.x, vertex.position.x);
+        aabb_.minPoint.y = std::min(aabb_.minPoint.y, vertex.position.y);
+        aabb_.minPoint.z = std::min(aabb_.minPoint.z, vertex.position.z);
+
+        aabb_.maxPoint.x = std::max(aabb_.maxPoint.x, vertex.position.x);
+        aabb_.maxPoint.y = std::max(aabb_.maxPoint.y, vertex.position.y);
+        aabb_.maxPoint.z = std::max(aabb_.maxPoint.z, vertex.position.z);
+    }
 }
 
 void Mesh::Draw(const Shared<Shader>& shader)

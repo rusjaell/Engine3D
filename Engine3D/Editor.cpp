@@ -11,6 +11,7 @@ Editor::Editor()
     viewportFrameBuffer_ = MakeShared<FrameBuffer>(spec);
     
     scene_ = new Scene();
+    scene_->SetViewport(app.window().width(), app.window().height());
 }
 
 Editor::~Editor()
@@ -22,6 +23,7 @@ void Editor::OnEvent(Event& event)
 
 void Editor::OnImGuiRender(double time, double dt)
 {
+#ifdef _DEBUG
     static bool dockspaceOpen = true;
     static bool opt_fullscreen_persistant = true;
     bool opt_fullscreen = opt_fullscreen_persistant;
@@ -105,9 +107,8 @@ void Editor::OnImGuiRender(double time, double dt)
         RenderDebug();
 
         ImGui::End();
-        
-        //first_time = true;
     }
+#endif
 }
 
 void Editor::OnUpdate(double time, double dt)
@@ -117,14 +118,12 @@ void Editor::OnUpdate(double time, double dt)
 
 void Editor::OnRender(double time, double dt)
 {
+#ifdef _DEBUG
     FrameBufferSpecification spec = viewportFrameBuffer_->specification();
     if (viewportSize_.x > 0.0f && viewportSize_.y > 0.0f && (spec.width != viewportSize_.x || spec.height != viewportSize_.y)) {
         viewportFrameBuffer_->Resize(viewportSize_.x, viewportSize_.y);
         scene_->SetViewport(viewportSize_.x, viewportSize_.y);
     }
-
-    glClearColor(0, 0, 0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     viewportFrameBuffer_->Bind();
 
@@ -134,6 +133,12 @@ void Editor::OnRender(double time, double dt)
     scene_->OnRender(time, dt);
 
     viewportFrameBuffer_->Unbind();
+#else
+    glClearColor(backgroundColor_.r, backgroundColor_.g, backgroundColor_.b, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    scene_->OnRender(time, dt);
+#endif
 }
 
 void Editor::RenderViewport()
@@ -203,5 +208,9 @@ void Editor::RenderDebug()
     ImGui::Spacing();
     ImGui::ColorEdit3("ClearColor", &backgroundColor_[0], 0);
 
+    bool vSync = Application::instance().vSync();
+    if (ImGui::Checkbox("V-Sync", &vSync)) {
+        Application::instance().SetVSync(vSync);
+    }
     ImGui::End();
 }

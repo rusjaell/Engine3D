@@ -19,6 +19,7 @@ Shared<Model> backpack_;
 Camera camera({ 0, 0, 0 });
 
 bool pressedReload = false;
+bool vSyncPressed = false;
 bool pressed = false;
 glm::vec3 backgroundColor = { 0, 0, 0 };
 
@@ -27,8 +28,8 @@ Scene::Scene()
     modelShader_ = ShaderLibrary::LoadShader("default", "resources/shaders/default.vert", "resources/shaders/default.frag");
 
     model_ = ModelLibrary::LoadModel("sponza", "resources/assets/sponza/sponza.obj");
-    test_ = ModelLibrary::LoadModel("material_test", "resources/assets/material_test/material_test.obj");
-    //backpack_ = ModelLibrary::LoadModel("backpack", "resources/assets/backpack/backpack.obj");
+    test_ = ModelLibrary::LoadModel("material_test", "resources/asBsets/material_test/material_test.obj");
+    backpack_ = ModelLibrary::LoadModel("backpack", "resources/assets/backpack/backpack.obj");
     //backpack_ = ModelLibrary::LoadModel("helmet", "resources/assets/damaged_helmet/DamagedHelmet.gltf");
 
     //Shared<Material> m = AssetLibrary::LoadMaterial("pathTest");
@@ -176,6 +177,18 @@ void Scene::OnUpdate(double time, double dt)
         pressedReload = false;
     }
 
+    if (Input::IsKeyDown(KeyCode::F2)) {
+        if (!vSyncPressed) {
+            bool vSync = Application::instance().vSync();
+            Application::instance().SetVSync(!vSync);
+            vSyncPressed = true;
+        }
+    }
+
+    if (Input::IsKeyUp(KeyCode::F2)) {
+        vSyncPressed = false;
+    }
+
     if (Input::IsKeyDown(KeyCode::Esc)) {
         if (!pressed) {
             Application::instance().ToggleCursor();
@@ -249,34 +262,32 @@ void Scene::OnRender(double time, double dt)
     modelShader_->SetUniformMatrix4f("u_View", viewMatrix);
     
     glm::mat4 model(1.0);
+
+    glm::vec3 pos(0, 0, 0);
+
     model = glm::translate(model, glm::vec3(0, 0, 0));
-    model = glm::scale(model, glm::vec3 { 0.00625f });
+    model = glm::scale(model, glm::vec3{ 0.00625f });
     modelShader_->SetUniformMatrix4f("u_Model", model);
 
     model_->Draw(modelShader_);
 
-    model = glm::mat4(1.0);
-    model = glm::scale(model, glm::vec3{ 1 });
-    model = glm::translate(model, glm::vec3(0, 0, 0));
-    modelShader_->SetUniformMatrix4f("u_Model", model);
+    for (int x = 0; x < 8; x++) {
+        for (int y = 0; y < 8; y++) {
+            for (int z = 0; z < 8; z++) {
 
-    test_->Draw(modelShader_);
+                glm::vec3 pos(x - 4, y + 12, z - 4);
 
-    //for (int x = 0; x < 8; x++) {
-    //    for (int y = 0; y < 8; y++) {
-    //        for (int z = 0; z < 8; z++) {
+                model = glm::mat4(1.0);
+                model = glm::translate(model, pos);
+                model = glm::scale(model, glm::vec3{ 0.00625f / 4 });
+                //model = glm::scale(model, glm::vec3{ 0.5f / 4 });
 
-    //            model = glm::mat4(1.0);
-    //            model = glm::translate(model, glm::vec3(x - 4, y + 12, z - 4));
-    //            model = glm::scale(model, glm::vec3{ 0.00625f / 4 });
-    //            //model = glm::scale(model, glm::vec3{ 0.5f / 4 });
+                modelShader_->SetUniformMatrix4f("u_Model", model);
 
-    //            modelShader_->SetUniformMatrix4f("u_Model", model);
-
-    //            backpack_->Draw(modelShader_);
-    //        }
-    //    }
-    //}
+                backpack_->Draw(modelShader_);
+            }
+        }
+    }
 }
 
 void Scene::SetViewport(unsigned int width, unsigned int height)

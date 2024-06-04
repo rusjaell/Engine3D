@@ -19,6 +19,8 @@ Application::Application(const char* title, unsigned int width, unsigned int hei
 
 	imGUIDebug_ = new ImGUIDebug();
 	scene_ = new Editor();
+
+	SetVSync(false);
 }
 
 Application::~Application()
@@ -30,8 +32,6 @@ Application::~Application()
 
 void Application::Run()
 {
-	//glfwSwapInterval(0);
-
 	const double UPS = 60.0; // Updates per second
 
 	const double updateInterval = 1.0 / UPS; // Fixed update interval
@@ -87,12 +87,13 @@ void Application::Run()
 			lastFPS_ = frameCount;
 			lastUPS_ = updateCount;
 			
-			//std::cout << "FPS: " << lastFPS_ << " UPS: " << lastUPS_ << " DRAWS: " << draws_ << " VERTICES: " << vertices << '\n';
+			std::cout << "FPS: " << lastFPS_ << " UPS: " << lastUPS_ << " DRAWS: " << draws_ << " VERTICES: " << vertices << '\n';
 
 			frameCount = 0;
 			updateCount = 0;
 			fpsTimer = 0.0;
 		}
+
 		vertices = 0;
 		draws_ = 0;
 	}
@@ -114,6 +115,12 @@ void Application::OnEvent(Event& e)
 Window& Application::window()
 {
 	return *window_;
+}
+
+void Application::SetVSync(bool enabled)
+{
+	vSync_ = enabled;
+	glfwSwapInterval(enabled ? 0 : 1);
 }
 
 void Application::ToggleCursor()

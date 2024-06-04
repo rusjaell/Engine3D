@@ -11,16 +11,24 @@ struct VertexData
     glm::vec3 normal;
 };
 
+struct AABB {
+    glm::vec3 minPoint;
+    glm::vec3 maxPoint;
+};
+
 struct Mesh
 {
     Mesh(std::vector<VertexData> vertices, std::vector<unsigned int> indices, const Shared<Material>& material);
 
     void Draw(const Shared< Shader>& shader);
 
+    void CalculateAABB();
+
 //private:
     std::vector<VertexData> vertices_;
     std::vector<unsigned int> indices_;
     Shared<Material> material_;
+    AABB aabb_;
 
     unsigned int VAO, VBO, EBO;
 };
