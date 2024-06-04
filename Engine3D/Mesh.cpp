@@ -37,47 +37,56 @@ Mesh::Mesh(std::vector<VertexData> vertices, std::vector<unsigned int> indices, 
 
 void Mesh::Draw(const Shared<Shader>& shader)
 {
-    shader->SetUniform1i("u_Diffuse", 0);
-    shader->SetUniform1i("u_Roughness", 1);
-    shader->SetUniform1i("u_Normal", 2);
-    shader->SetUniform1i("u_Ambient", 3);
-    shader->SetUniform1i("u_Specular", 4);
-    shader->SetUniform1i("u_Metallic", 5);
-
-    if (material_->albedoMap != nullptr) {
-        material_->albedoMap->Bind(0);
+  /*  unsigned int textureSlot = 0;
+    
+    if (material_->diffuseTexture != nullptr) {
+        material_->diffuseTexture->Bind(textureSlot);
+        shader->SetUniform1i("u_Diffuse", textureSlot);
+        textureSlot++;
     }
 
     if (material_->roughnessMap != nullptr) {
-        material_->roughnessMap->Bind(1);
+        material_->roughnessMap->Bind(textureSlot);
+        shader->SetUniform1i("u_Roughness", textureSlot);
+        textureSlot++;
     }
 
     if (material_->normalMap != nullptr) {
-        material_->normalMap->Bind(2);
+        material_->normalMap->Bind(textureSlot);
+        shader->SetUniform1i("u_Normal", textureSlot);
+        textureSlot++;
     }
 
     if (material_->ambientOcclusionMap != nullptr) {
-        material_->ambientOcclusionMap->Bind(3);
+        material_->ambientOcclusionMap->Bind(textureSlot);
+        shader->SetUniform1i("u_Ambient", textureSlot);
+        textureSlot++;
     }
 
     if (material_->specularMap != nullptr) {
-        material_->specularMap->Bind(4);
+        material_->specularMap->Bind(textureSlot);
+        shader->SetUniform1i("u_Specular", textureSlot);
+        textureSlot++;
     }
 
     if (material_->metallicMap != nullptr) {
-        material_->metallicMap->Bind(5);
+        material_->metallicMap->Bind(textureSlot);
+        shader->SetUniform1i("u_Metallic", textureSlot);
+        textureSlot++;
     }
 
-    shader->SetUniform4f("u_AlbedoColor", material_->defaultAlbedoColor);
-    shader->SetUniform4f("u_AmbientColor", material_->defaultAmbientColor);
+    shader->SetUniform4f("u_AlbedoColor", material_->diffuseColor);
+    shader->SetUniform4f("u_AmbientColor", material_->ambientColor);*/
+
+    material_->Use(shader);
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices_.size(), GL_UNSIGNED_INT, 0);
 
-    for (int i = 0; i < 6; ++i) {
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
+    //for (int i = 0; i < 6; ++i) {
+    //    glActiveTexture(GL_TEXTURE0 + i);
+    //    glBindTexture(GL_TEXTURE_2D, 0);
+    //}
 
     Application::draws_++;
     Application::vertices += vertices_.size();

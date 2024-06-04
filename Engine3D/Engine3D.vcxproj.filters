@@ -39,9 +39,6 @@
     <Filter Include="Source Files\Engine\Input">
       <UniqueIdentifier>{eb1381f9-a063-42a7-a407-8a4cdc3e6c32}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Game">
-      <UniqueIdentifier>{880496a4-a1af-4d76-823a-3814c8413537}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Engine\Debug">
       <UniqueIdentifier>{a2b15de4-503f-46c7-8810-d75539d5c761}</UniqueIdentifier>
     </Filter>
@@ -50,6 +47,9 @@
     </Filter>
     <Filter Include="Source Files\Engine\Renderer\Models\Data">
       <UniqueIdentifier>{0b9ec610-e904-4129-8c17-a58ed76ab189}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Editor">
+      <UniqueIdentifier>{880496a4-a1af-4d76-823a-3814c8413537}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -123,13 +123,13 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
-      <Filter>Source Files\Game</Filter>
+      <Filter>Source Files\Editor</Filter>
     </ClCompile>
     <ClCompile Include="ImGUIOverlay.cpp">
       <Filter>Source Files\Engine\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
-      <Filter>Source Files\Game</Filter>
+      <Filter>Source Files\Editor</Filter>
     </ClCompile>
     <ClCompile Include="ModelLibrary.cpp">
       <Filter>Source Files\Engine\Renderer\Models</Filter>
@@ -223,13 +223,13 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
-      <Filter>Source Files\Game</Filter>
+      <Filter>Source Files\Editor</Filter>
     </ClInclude>
     <ClInclude Include="ImGUIOverlay.h">
       <Filter>Source Files\Engine\Debug</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>Source Files\Game</Filter>
+      <Filter>Source Files\Editor</Filter>
     </ClInclude>
     <ClInclude Include="ModelLibrary.h">
       <Filter>Source Files\Engine\Renderer\Models</Filter>

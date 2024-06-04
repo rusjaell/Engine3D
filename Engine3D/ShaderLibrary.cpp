@@ -29,9 +29,8 @@ void ShaderLibrary::Reload()
 
 		Shared<Shader> newShader = MakeShared<Shader>(kvp.second->vertexPath().c_str(), kvp.second->fragmentPath().c_str());
 		if (newShader->IsCompiled()) {
-
 			current->SwapProgram(newShader);
-			//std::cout << "Reloaded Shader: " << kvp.first << '\n';
+			std::cout << "Reloaded Shader: " << kvp.first << '\n';
 		}
 		else {
 			std::cout << "Failed to load shader, not swapping\n";

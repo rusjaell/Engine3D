@@ -140,8 +140,6 @@ Window::Window(const char* title, unsigned int width, unsigned int height)
             Input::OnMouseMoveEvent(event);
             data.EventCallback(event);
         });
-
-    glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 Window::~Window() {

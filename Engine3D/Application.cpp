@@ -29,7 +29,7 @@ Application::~Application()
 
 void Application::Run()
 {
-	glfwSwapInterval(0);
+	//glfwSwapInterval(0);
 
 	const double UPS = 60.0; // Updates per second
 
@@ -50,7 +50,7 @@ void Application::Run()
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
-	glClearColor( 0, 0, 0, 1 );
+	glClearColor( 1, 0, 0, 1 );
 
 	while (isRunning_) {
 
@@ -69,12 +69,12 @@ void Application::Run()
 			updateCount++; // Increment update counter
 		}
 
+		scene_->OnRender(time_, deltaTime);
+
 		imGUIDebug_->Begin();
 		scene_->OnImGuiRender(time_, deltaTime);
 		imGUIDebug_->End();
-
-		scene_->OnRender(time_, deltaTime);
-
+		
 		frameCount++;
 
 		window_->OnUpdate();
@@ -86,7 +86,7 @@ void Application::Run()
 			lastFPS_ = frameCount;
 			lastUPS_ = updateCount;
 			
-			std::cout << "FPS: " << lastFPS_ << " UPS: " << lastUPS_ << " DRAWS: " << draws_ << " VERTICES: " << vertices << '\n';
+			//std::cout << "FPS: " << lastFPS_ << " UPS: " << lastUPS_ << " DRAWS: " << draws_ << " VERTICES: " << vertices << '\n';
 
 			frameCount = 0;
 			updateCount = 0;
@@ -113,4 +113,13 @@ void Application::OnEvent(Event& e)
 Window& Application::window()
 {
 	return *window_;
+}
+
+void Application::ToggleCursor()
+{
+	toggleCursor_ = !toggleCursor_;
+	if (toggleCursor_)
+		glfwSetInputMode(window_->window(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	else
+		glfwSetInputMode(window_->window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }

@@ -17,7 +17,7 @@ struct Mesh
 
     void Draw(const Shared< Shader>& shader);
 
-private:
+//private:
     std::vector<VertexData> vertices_;
     std::vector<unsigned int> indices_;
     Shared<Material> material_;

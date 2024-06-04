@@ -12,15 +12,23 @@ const unsigned int SCR_HEIGHT = 720;
 Shared<Shader> modelShader_;
 
 Shared<Model> model_;
+Shared<Model> test_;
 Shared<Model> backpack_;
+
+Camera camera({ 0, 0, 0 });
+
+bool pressedReload = false;
+bool pressed = false;
+glm::vec3 backgroundColor = { 0, 0, 0 };
 
 Scene::Scene()
 {
     modelShader_ = ShaderLibrary::LoadShader("default", "resources/shaders/default.vert", "resources/shaders/default.frag");
 
-    //model_ = ModelLibrary::LoadModel("sponza", "resources/assets/sponza/sponza.obj");
-    model_ = ModelLibrary::LoadModel("backpack", "resources/assets/backpack/backpack.obj");
-    backpack_ = ModelLibrary::LoadModel("helmet", "resources/assets/damaged_helmet/DamagedHelmet.gltf");
+    model_ = ModelLibrary::LoadModel("sponza", "resources/assets/sponza/sponza.glb");
+    test_ = ModelLibrary::LoadModel("material_test", "resources/assets/material_test/material_test.obj");
+    //backpack_ = ModelLibrary::LoadModel("backpack", "resources/assets/backpack/backpack.obj");
+    //backpack_ = ModelLibrary::LoadModel("helmet", "resources/assets/damaged_helmet/DamagedHelmet.gltf");
 }
 
 Scene::~Scene()
@@ -33,16 +41,140 @@ void Scene::OnEvent(Event& event)
 
 void Scene::OnImGuiRender(double time, double dt)
 {
-}
+    ImGui::Begin("Environment");
+    ImGui::Text("FPS: %d UPS: %d DRAW_CALLS: %d VERTICES: %d", Application::instance().frames(), Application::instance().updates(), Application::instance().draws_, Application::instance().vertices);
+    ImGui::SliderFloat3("Background Color", &backgroundColor[0], 0.0, 1.0f);
+    //std::cout << "FPS: " << lastFPS_ << " UPS: " << lastUPS_ << " DRAWS: " << draws_ << " VERTICES: " << vertices << '\n';
 
-Camera camera({ 0, 0, 0 });
+    ImGui::End();
+
+    ImGui::Begin("Materials");
+
+    std::unordered_set<unsigned int> keys;
+    std::vector<Shared<Material>> materials;
+
+    for (size_t i = 0; i < model_->meshes.size(); i++)
+    {
+        Shared<Material> material = model_->meshes[i].material_;
+        if (keys.find(material->materialId) != keys.end()) {
+            continue;
+        }
+        keys.insert(material->materialId);
+        materials.push_back(model_->meshes[i].material_);
+    }
+
+    std::vector<std::string> materialNames;
+
+    // Populate material names
+    for (const auto& material : materials) {
+        materialNames.push_back(material->name);
+    }
+
+    // Variable to store the selected material index
+    static int selectedMaterialIndex = -1;
+
+    ImGui::Spacing();
+    ImGui::Text("Material:");
+
+    // Dropdown menu to select material
+    ImGui::SetNextItemWidth(128);
+    if (ImGui::BeginCombo("##MaterialCombo", selectedMaterialIndex == -1 ? "Select Material" : materialNames[selectedMaterialIndex].c_str())) {
+        for (int i = 0; i < materialNames.size(); ++i) {
+            bool isSelected = (selectedMaterialIndex == i);
+            if (ImGui::Selectable(materialNames[i].c_str(), isSelected)) {
+                selectedMaterialIndex = i;
+            }
+            if (isSelected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Reload Shaders")) {
+        ShaderLibrary::Reload();
+    }
+
+    if (selectedMaterialIndex != -1 && selectedMaterialIndex < materials.size()) {
+        Shared<Material> selectedMaterial = materials[selectedMaterialIndex];
+
+
+        unsigned int textureID;
+
+        if (selectedMaterial->diffuseTexture != nullptr) {
+            textureID = selectedMaterial->diffuseTexture->id();
+            ImGui::Spacing();
+            ImGui::Text("Diffuse:");
+            ImGui::Image((ImTextureID)textureID, ImVec2(256, 256));
+            ImGui::SliderFloat3("##Diffuse Albedo", &selectedMaterial->diffuseColor[0], 0, 1);
+        }
+
+        if (selectedMaterial->ambientTexture != nullptr) {
+            textureID = selectedMaterial->ambientTexture->id();
+            ImGui::Spacing();
+            ImGui::Text("Ambient:");
+            ImGui::Image((ImTextureID)textureID, ImVec2(256, 256));
+            ImGui::SliderFloat3("##Ambient Ambient", &selectedMaterial->ambientColor[0], 0, 1);
+        }
+
+        if (selectedMaterial->specularTexture != nullptr) {
+            textureID = selectedMaterial->specularTexture->id();
+            ImGui::Spacing();
+            ImGui::Text("Specular:");
+            ImGui::Image((ImTextureID)textureID, ImVec2(256, 256));
+            ImGui::SliderFloat3("##Specular Specular", &selectedMaterial->specularColor[0], 0, 1);
+        }
+
+        if (selectedMaterial->normalTexture != nullptr) {
+            textureID = selectedMaterial->normalTexture->id();
+            ImGui::Spacing();
+            ImGui::Text("Normal:");
+            ImGui::Image((ImTextureID)textureID, ImVec2(256, 256));
+        }
+
+        if (selectedMaterial->alphaTexture != nullptr) {
+            textureID = selectedMaterial->alphaTexture->id();
+            ImGui::Spacing();
+            ImGui::Text("Alpha Texture:");
+            ImGui::Image((ImTextureID)textureID, ImVec2(256, 256));
+        }
+
+        if (selectedMaterial->displacementTexture != nullptr) {
+            textureID = selectedMaterial->displacementTexture->id();
+            ImGui::Spacing();
+            ImGui::Text("Displacement:");
+            ImGui::Image((ImTextureID)textureID, ImVec2(256, 256));
+        }
+    }
+
+    ImGui::End();
+}
 
 void Scene::OnUpdate(double time, double dt)
 {
     camera.MovementSpeed = 2.5f;
 
-    if (!Input::IsKeyRepeating(KeyCode::F1) && Input::IsKeyDown(KeyCode::F1)) {
-        ShaderLibrary::Reload(); // will create a memory leak
+    if (Input::IsKeyDown(KeyCode::F1)) {
+        if (!pressedReload) {
+            ShaderLibrary::Reload();
+            pressedReload = true;
+        }
+    }
+
+    if (Input::IsKeyUp(KeyCode::F1)) {
+        pressedReload = false;
+    }
+
+    if (Input::IsKeyDown(KeyCode::Esc)) {
+        if (!pressed) {
+            Application::instance().ToggleCursor();
+            pressed = true;
+        }
+    }
+
+    if(Input::IsKeyUp(KeyCode::Esc)) {
+        pressed = false;
     }
 
     if (Input::IsKeyDown(KeyCode::W)) {
@@ -58,11 +190,18 @@ void Scene::OnUpdate(double time, double dt)
         camera.ProcessKeyboard(RIGHT, dt);
     }
 
+
     static bool firstMouse = false;
+    if (Application::instance().isCursorEnabled()) {
+        firstMouse = true;
+        return;
+    }
+
     static float lastX = 0.0f;
     static float lastY = 0.0f;
     float xpos = static_cast<float>(Input::mouseX());
     float ypos = static_cast<float>(Input::mouseY());
+
     if (firstMouse)
     {
         lastX = xpos;
@@ -83,11 +222,11 @@ void Scene::OnUpdate(double time, double dt)
 
 void Scene::OnRender(double time, double dt)
 {
-    glClearColor(0.0, 0.0f, 0.0f, 1.0f);
+    glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     float fov = glm::radians(camera.Zoom);
-    float aspectRatio = SCR_WIDTH / SCR_HEIGHT;
+    float aspectRatio = (float)SCR_WIDTH / SCR_HEIGHT;
     float nearClip = 0.1f; // Near clipping plane
     float farClip = 100.0f; // Far clipping plane
 
@@ -100,17 +239,18 @@ void Scene::OnRender(double time, double dt)
     modelShader_->SetUniformMatrix4f("u_View", viewMatrix);
     
     glm::mat4 model(1.0);
+    model = glm::translate(model, glm::vec3(0, 0, 0));
     model = glm::scale(model, glm::vec3 { 0.00625f });
     modelShader_->SetUniformMatrix4f("u_Model", model);
 
     model_->Draw(modelShader_);
 
     model = glm::mat4(1.0);
-    model = glm::translate(model, glm::vec3(5, 0, 0));
     model = glm::scale(model, glm::vec3{ 1 });
-
+    model = glm::translate(model, glm::vec3(0, 0, 0));
     modelShader_->SetUniformMatrix4f("u_Model", model);
-    backpack_->Draw(modelShader_);
+
+    test_->Draw(modelShader_);
 
     //for (int x = 0; x < 8; x++) {
     //    for (int y = 0; y < 8; y++) {
@@ -118,8 +258,8 @@ void Scene::OnRender(double time, double dt)
 
     //            model = glm::mat4(1.0);
     //            model = glm::translate(model, glm::vec3(x - 4, y + 12, z - 4));
-    //            //model = glm::scale(model, glm::vec3{ 0.00625f / 4 });
-    //            model = glm::scale(model, glm::vec3{ 0.5f / 4 });
+    //            model = glm::scale(model, glm::vec3{ 0.00625f / 4 });
+    //            //model = glm::scale(model, glm::vec3{ 0.5f / 4 });
 
     //            modelShader_->SetUniformMatrix4f("u_Model", model);
 

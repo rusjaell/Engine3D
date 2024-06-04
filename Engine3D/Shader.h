@@ -23,6 +23,8 @@ public:
 	void Use() const;
 	void Unbind() const;
 
+	bool HasUniform(const std::string& name);
+
 	void SetUniform1i(const std::string& name, int value);
 	void SetUniform1iv(const std::string& name, int* values, int count);
 

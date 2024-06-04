@@ -106,6 +106,12 @@ void Shader::Unbind() const
 	glUseProgram(0);
 }
 
+bool Shader::HasUniform(const std::string& name)
+{
+	int location = glGetUniformLocation(handle_, name.c_str());
+	return location != -1;
+}
+
 void Shader::SetUniform1i(const std::string& name, int value)
 {
 	GLuint location = GetUniformLocation(name);
@@ -150,7 +156,9 @@ void Shader::SetUniformMatrix4f(const std::string& name, const glm::mat4& matrix
 
 void Shader::SwapProgram(const Shared<Shader>& otherShader)
 {
+	glDeleteProgram(handle_);
 	handle_ = otherShader->handle_;
+	uniformCache_.clear();
 }
 
 int Shader::GetUniformLocation(const std::string& name) {
@@ -159,10 +167,6 @@ int Shader::GetUniformLocation(const std::string& name) {
 	}
 
 	int location = glGetUniformLocation(handle_, name.c_str());
-	if (location == -1) {
-		std::cout << "Warning uniform: '" << name << "' doesnt exist!\n";
-	}
-
 	uniformCache_[name] = location;
 	return location;
 }

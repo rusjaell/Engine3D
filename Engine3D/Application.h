@@ -25,6 +25,12 @@ public:
 		return *instance_;
 	}
 
+	bool isCursorEnabled() const {
+		return toggleCursor_;
+	}
+
+	void ToggleCursor();
+
 	static int draws_;
 	static int vertices;
 
@@ -38,6 +44,8 @@ private:
 	double time_;
 	int lastFPS_;
 	int lastUPS_;
+
+	bool toggleCursor_;
 
 	static Application* instance_;
 };

@@ -1,7 +1,9 @@
 #include "pch.h"
 #include "ModelLibrary.h"
 
-std::vector<Shared<Texture>> ModelLibrary::loadedTextures_;
+unsigned int ModelLibrary::nextMaterialId_ = 0;
+std::map<std::string, Shared<Material>> ModelLibrary::loadedMaterials_;
+std::map<std::string, Shared<Texture>> ModelLibrary::loadedTextures_;
 std::map<std::string, Shared<Model>> ModelLibrary::loadedModels_;
 
 Shared<Model> ModelLibrary::GetModel(const std::string& name)
@@ -15,15 +17,14 @@ Shared<Model> ModelLibrary::GetModel(const std::string& name)
 
 Shared<Model> ModelLibrary::LoadModel(const std::string& name, const std::string& path)
 {
-    loadedTextures_.clear();
-
     if (loadedModels_.find(name) != loadedModels_.end()) {
         std::cout << "Model with name: " << name << " has already been loaded\n";
         return nullptr;
     }
 
     Assimp::Importer import;
-    const aiScene * scene = import.ReadFile(path, aiProcess_Triangulate); //| aiProcess_FlipUVs);
+    const aiScene * scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices); //| aiProcess_FlipUVs);
+    //const aiScene * scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
@@ -42,14 +43,12 @@ Shared<Model> ModelLibrary::LoadModel(const std::string& name, const std::string
 
 void ModelLibrary::ProcessNode(const std::string& directory, const Shared<Model>& model, aiNode* node, const aiScene* scene)
 {
-    // process all the node's meshes (if any)
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
         model->meshes.push_back(ProcessMesh(directory, model, mesh, scene));
     }
 
-    // then do the same for each of its children
     for (unsigned int i = 0; i < node->mNumChildren; i++)
     {
         ProcessNode(directory, model, node->mChildren[i], scene);
@@ -62,7 +61,6 @@ Mesh ModelLibrary::ProcessMesh(const std::string& directory, const Shared<Model>
     std::vector<unsigned int> indices;
     std::vector<Shared<Texture>> textures;
 
-    // walk through each of the mesh's vertices
     for (int i = 0; i < mesh->mNumVertices; i++)
     {
         VertexData vertex;
@@ -70,7 +68,7 @@ Mesh ModelLibrary::ProcessMesh(const std::string& directory, const Shared<Model>
         vertex.position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
 
         // uv
-        if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
+        if (mesh->mTextureCoords[0])
         {
             vertex.uv = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
 
@@ -97,92 +95,120 @@ Mesh ModelLibrary::ProcessMesh(const std::string& directory, const Shared<Model>
         vertices.push_back(vertex);
     }
 
-    // now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
     for (int i = 0; i < mesh->mNumFaces; i++)
     {
         aiFace face = mesh->mFaces[i];
-
-        // retrieve all indices of the face and store them in the indices vector
         for (int j = 0; j < face.mNumIndices; j++) {
             indices.push_back(face.mIndices[j]);
         }
     }
     
-    Shared<Material> m = MakeShared<Material>();
-    if (scene->HasMaterials()) {
-
-        // process materials
+    Shared<Material> m;
+    if (scene->HasMaterials()) 
+    {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-        std::cout << '\n';
-        int count = material->GetTextureCount(aiTextureType_DIFFUSE);
-        std::cout << "aiTextureType_DIFFUSE: " << count << '\n';
-
-        count = material->GetTextureCount(aiTextureType_SPECULAR);
-        std::cout << "aiTextureType_SPECULAR: " << count << '\n';
-
-        count = material->GetTextureCount(aiTextureType_AMBIENT);
-        std::cout << "aiTextureType_AMBIENT: " << count << '\n';
-
-        count = material->GetTextureCount(aiTextureType_EMISSIVE);
-        std::cout << "aiTextureType_EMISSIVE: " << count << '\n';
-
-        count = material->GetTextureCount(aiTextureType_HEIGHT);
-        std::cout << "aiTextureType_HEIGHT: " << count << '\n';
-
-        count = material->GetTextureCount(aiTextureType_NORMALS);
-        std::cout << "aiTextureType_NORMALS: " << count << '\n';
-
-        count = material->GetTextureCount(aiTextureType_SHININESS);
-        std::cout << "aiTextureType_SHININESS: " << count << '\n';
-
-        count = material->GetTextureCount(aiTextureType_OPACITY);
-        std::cout << "aiTextureType_OPACITY: " << count << '\n';
-
-        count = material->GetTextureCount(aiTextureType_DISPLACEMENT);
-        std::cout << "aiTextureType_DISPLACEMENT: " << count << '\n';
-
-        count = material->GetTextureCount(aiTextureType_UNKNOWN);
-        std::cout << "aiTextureType_UNKNOWN: " << count << '\n';
-
-        // Albedo map (diffuse texture)
-        aiString path;
-        if (material->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS) {
-            m->albedoMap = MakeShared<Texture>(directory + "/" + path.C_Str());
+        std::string materialKey = material->GetName().C_Str();
+        if (loadedMaterials_.find(materialKey) != loadedMaterials_.end())
+        {
+            m = loadedMaterials_[materialKey];
         }
+        else
+        {
+            m = MakeShared<Material>();
+            m->name = materialKey;
+            m->materialId = nextMaterialId_;
+            nextMaterialId_++;
 
-        // Roughness map
-        if (material->GetTexture(aiTextureType_SHININESS, 0, &path) == AI_SUCCESS) {
-            m->roughnessMap = MakeShared<Texture>(directory + "/" + path.C_Str());
+            std::cout << '\n';
+            int count = material->GetTextureCount(aiTextureType_DIFFUSE);
+            std::cout << "aiTextureType_DIFFUSE: " << count << '\n';
+
+            count = material->GetTextureCount(aiTextureType_SPECULAR);
+            std::cout << "aiTextureType_SPECULAR: " << count << '\n';
+
+            count = material->GetTextureCount(aiTextureType_AMBIENT);
+            std::cout << "aiTextureType_AMBIENT: " << count << '\n';
+
+            count = material->GetTextureCount(aiTextureType_EMISSIVE);
+            std::cout << "aiTextureType_EMISSIVE: " << count << '\n';
+
+            count = material->GetTextureCount(aiTextureType_HEIGHT);
+            std::cout << "aiTextureType_HEIGHT: " << count << '\n';
+
+            count = material->GetTextureCount(aiTextureType_NORMALS);
+            std::cout << "aiTextureType_NORMALS: " << count << '\n';
+
+            count = material->GetTextureCount(aiTextureType_SHININESS);
+            std::cout << "aiTextureType_SHININESS: " << count << '\n';
+
+            count = material->GetTextureCount(aiTextureType_OPACITY);
+            std::cout << "aiTextureType_OPACITY: " << count << '\n';
+
+            count = material->GetTextureCount(aiTextureType_DISPLACEMENT);
+            std::cout << "aiTextureType_DISPLACEMENT: " << count << '\n';
+
+            count = material->GetTextureCount(aiTextureType_LIGHTMAP);
+            std::cout << "aiTextureType_LIGHTMAP: " << count << '\n';
+
+            count = material->GetTextureCount(aiTextureType_REFLECTION);
+            std::cout << "aiTextureType_REFLECTION: " << count << '\n';
+
+            count = material->GetTextureCount(aiTextureType_BASE_COLOR);
+            std::cout << "aiTextureType_BASE_COLOR: " << count << '\n';
+
+            count = material->GetTextureCount(aiTextureType_NORMAL_CAMERA);
+            std::cout << "aiTextureType_NORMAL_CAMERA: " << count << '\n';
+
+            count = material->GetTextureCount(aiTextureType_EMISSION_COLOR);
+            std::cout << "aiTextureType_EMISSION_COLOR: " << count << '\n';
+
+            count = material->GetTextureCount(aiTextureType_METALNESS);
+            std::cout << "aiTextureType_METALNESS: " << count << '\n';
+
+            count = material->GetTextureCount(aiTextureType_DIFFUSE_ROUGHNESS);
+            std::cout << "aiTextureType_DIFFUSE_ROUGHNESS: " << count << '\n';
+
+            count = material->GetTextureCount(aiTextureType_AMBIENT_OCCLUSION);
+            std::cout << "aiTextureType_AMBIENT_OCCLUSION: " << count << '\n';
+
+            count = material->GetTextureCount(aiTextureType_SHEEN);
+            std::cout << "aiTextureType_SHEEN: " << count << '\n';
+
+            count = material->GetTextureCount(aiTextureType_CLEARCOAT);
+            std::cout << "aiTextureType_CLEARCOAT: " << count << '\n';
+
+            count = material->GetTextureCount(aiTextureType_TRANSMISSION);
+            std::cout << "aiTextureType_TRANSMISSION: " << count << '\n';
+
+            count = material->GetTextureCount(aiTextureType_UNKNOWN);
+            std::cout << "aiTextureType_UNKNOWN: " << count << '\n';
+
+            aiString path;
+        
+            m->diffuseTexture = LoadTexture(directory, material, aiTextureType_DIFFUSE, "DIFFUSE");
+            m->ambientTexture = LoadTexture(directory, material, aiTextureType_AMBIENT, "AMBIENT");
+            m->specularTexture = LoadTexture(directory, material, aiTextureType_SPECULAR, "SPECULAR");
+            m->normalTexture = LoadTexture(directory, material, aiTextureType_NORMALS, "NORMALS");
+            m->alphaTexture = LoadTexture(directory, material, aiTextureType_OPACITY, "ALPHA");
+            m->displacementTexture = LoadTexture(directory, material, aiTextureType_DISPLACEMENT, "DISPLACEMENT");
+
+            aiColor4D diffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+            aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &diffuseColor);
+            m->diffuseColor = { diffuseColor.r, diffuseColor.g, diffuseColor.b };
+
+            aiColor4D ambientColor(1.0f, 1.0f, 1.0f, 1.0f);
+            aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, &ambientColor);
+            m->ambientColor = { ambientColor.r, ambientColor.g, ambientColor.b };
+
+            aiColor4D specularColor(1.0f, 1.0f, 1.0f, 1.0f);
+            aiGetMaterialColor(material, AI_MATKEY_COLOR_SPECULAR, &specularColor);
+            m->specularColor = { specularColor.r, specularColor.g, specularColor.b };
+
+            std::cout << "Loaded Material: " << materialKey << " id: " << nextMaterialId_ << '\n';
+
+            loadedMaterials_.insert(std::make_pair(materialKey, m));
         }
-
-        // Normal map
-        if (material->GetTexture(aiTextureType_NORMALS, 0, &path) == AI_SUCCESS) {
-            m->normalMap = MakeShared<Texture>(directory + "/" + path.C_Str());
-        }
-
-        // Ambient occlusion map
-        if (material->GetTexture(aiTextureType_AMBIENT, 0, &path) == AI_SUCCESS) {
-            m->ambientOcclusionMap = MakeShared<Texture>(directory + "/" + path.C_Str());
-        }
-
-        // Specular map
-        if (material->GetTexture(aiTextureType_SPECULAR, 0, &path) == AI_SUCCESS) {
-            m->specularMap = MakeShared<Texture>(directory + "/" + path.C_Str());
-        }
-
-        // Metallic map
-        if (material->GetTexture(aiTextureType_METALNESS, 0, &path) == AI_SUCCESS) {
-            m->metallicMap = MakeShared<Texture>(directory + "/" + path.C_Str());
-        }
-
-        aiColor4D diffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
-        aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &diffuseColor);
-        m->defaultAlbedoColor = { diffuseColor.r, diffuseColor.g, diffuseColor.b, diffuseColor.a };
-
-        aiColor4D ambientColor(1.0f, 1.0f, 1.0f, 1.0f);
-        aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, &ambientColor);
-        m->defaultAmbientColor = { ambientColor.r, ambientColor.g, ambientColor.b, ambientColor.a };
     }
     else {
         std::cout << "No Material " << '\n';
@@ -193,7 +219,19 @@ Mesh ModelLibrary::ProcessMesh(const std::string& directory, const Shared<Model>
     return Mesh(vertices, indices, m);
 }
 
-std::vector<Shared<Texture>> ModelLibrary::LoadMaterialTextures(const std::string& directory, aiMaterial* mat, aiTextureType type, std::string typeName)
+Shared<Texture> ModelLibrary::LoadTexture(const std::string& directory, aiMaterial* material, aiTextureType type, std::string typeName)
 {
-    return {};
+    aiString path;
+
+    aiReturn result = material->GetTexture(type, 0, &path);
+    if (result != aiReturn_SUCCESS) {
+        return nullptr;
+    }
+
+    std::string key = directory + "/" + path.C_Str();
+    if (loadedTextures_.find(key) == loadedTextures_.end()) {
+        std::cout << "Loaded Texture: " << key << '\n';
+        loadedTextures_.insert(std::make_pair(key, MakeShared<Texture>(key)));
+    }
+    return loadedTextures_[key];
 }

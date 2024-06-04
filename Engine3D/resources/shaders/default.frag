@@ -6,40 +6,33 @@ in vec3 v_Position;
 in vec2 v_UV;
 in vec3 v_Normal;
 
-uniform sampler2D u_Diffuse;
-uniform vec4 u_AlbedoColor;
+struct Material
+{
+    vec3 ambientColor;
+    vec3 diffuseColor;
+    vec3 specularColor;
+    
+    sampler2D diffuseTexture;
+    sampler2D ambientTexture;
+    sampler2D normalTexture;
+    sampler2D alphaTexture; // Added alpha texture
+    sampler2D displacementTexture;
+};
 
-uniform sampler2D u_Roughness;
-uniform sampler2D u_Metallic; // Add metallic texture sampler
-
-uniform sampler2D u_Normal;
-
-uniform sampler2D u_Ambient;
-uniform vec4 u_AmbientColor;
-
-uniform sampler2D u_Specular;
+uniform Material u_Material;
 
 void main()
 {
-    vec4 albedoColor = texture(u_Diffuse, v_UV);
-    vec3 ambientColor = texture(u_Ambient, v_UV).rgb;
-    vec3 normalMap = texture(u_Normal, v_UV).rgb;
-    float roughness = texture(u_Roughness, v_UV).r;
-    float metallic = texture(u_Metallic, v_UV).r; // Sample metallic map
-
-    // Apply ambient color
-    vec3 ambient = ambientColor * u_AmbientColor.rgb;
-
-    // Calculate specular intensity based on roughness and metallic
-    float specularIntensity = 1.0 - roughness;
-    vec3 specularColor = texture(u_Specular, v_UV).rgb;
-    vec3 specular = specularColor * u_AlbedoColor.rgb * specularIntensity * metallic;
-
-    // Calculate diffuse color
-    vec3 diffuse = albedoColor.rgb * u_AlbedoColor.rgb * (1.0 - metallic);
-
-    // Calculate final color
-    vec3 color = diffuse + ambient + specular;
-
-    o_Color = vec4(color, albedoColor.a * u_AlbedoColor.a);
+    vec4 diffuseColor = texture(u_Material.diffuseTexture, v_UV);
+    vec4 ambientColor = texture(u_Material.ambientTexture, v_UV);
+    vec4 alphaColor = texture(u_Material.alphaTexture, v_UV); 
+  
+    vec3 diffuse = diffuseColor.rgb * u_Material.diffuseColor;
+    vec3 ambient = ambientColor.rgb * u_Material.ambientColor;
+    
+    vec3 color = diffuse + ambient;
+	
+	float alphaValue = diffuseColor.a;
+	
+    o_Color = vec4(color, alphaValue);
 }
