@@ -25,7 +25,7 @@ Scene::Scene()
 {
     modelShader_ = ShaderLibrary::LoadShader("default", "resources/shaders/default.vert", "resources/shaders/default.frag");
 
-    model_ = ModelLibrary::LoadModel("sponza", "resources/assets/sponza/sponza.glb");
+    model_ = ModelLibrary::LoadModel("sponza", "resources/assets/sponza/sponza.obj");
     test_ = ModelLibrary::LoadModel("material_test", "resources/assets/material_test/material_test.obj");
     //backpack_ = ModelLibrary::LoadModel("backpack", "resources/assets/backpack/backpack.obj");
     //backpack_ = ModelLibrary::LoadModel("helmet", "resources/assets/damaged_helmet/DamagedHelmet.gltf");
