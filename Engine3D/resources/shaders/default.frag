@@ -60,10 +60,12 @@ void main()
 	float specAmount = pow(max(dot(viewDirection, reflectDirection), 0.0), u_Material.shininess);
 
 	vec3 diffuse = u_Light.diffuseColor * u_Material.diffuseColor * diffuseColor.rgb * diffuseAmount;
-    vec3 ambient = u_Light.ambientColor * u_Material.ambientColor * ambientColor.rgb;
+    //vec3 ambient = u_Light.ambientColor * u_Material.ambientColor * ambientColor.rgb;
+    vec3 ambient = u_Light.ambientColor * ambientColor.rgb;
     vec3 specular = u_Light.specularColor * u_Material.specularColor * specularColor.rgb * specAmount;  
 	
-	if(u_Light.vector.a != 1.0f){
+	if(u_Light.vector.a != 1.0f)
+	{
 		float constant = 1.0f;
 		float linear = 0.09f;
 		float quadratic = 0.08f;
