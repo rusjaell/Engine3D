@@ -133,9 +133,9 @@ void Editor::OnRender(double time, double dt)
     glClearColor(backgroundColor_.r, backgroundColor_.g, backgroundColor_.b, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     scene_->OnRender(time, dt);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     viewportFrameBuffer_->Unbind();
 #else
