@@ -3,8 +3,8 @@
 
 struct FrameBufferSpecification 
 {
-	unsigned int width = 0;
-	unsigned int height = 0;
+	unsigned int width = 1;
+	unsigned int height = 1;
 };
 
 class FrameBuffer
@@ -19,6 +19,7 @@ public:
 	void Bind();
 	void Unbind();
 
+	unsigned int id() const;
 	unsigned int colorAttachment() const;
 	unsigned int depthAttachment() const;
 	const FrameBufferSpecification& specification() const;

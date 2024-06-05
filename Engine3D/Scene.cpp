@@ -12,25 +12,42 @@ const unsigned int SCR_HEIGHT = 720;
 
 Shared<Shader> modelShader_;
 
-Shared<Model> model_;
+Shared<Model> sponza_;
+Shared<Model> backPack_;
+Shared<Model> helmet_;
 Shared<Model> test_;
-Shared<Model> backpack_;
 
-Camera camera({ 0, 0, 0 });
+int modelIndex_;
+
+Shared<Model> activeModel_;
+
+Camera camera({ 0, 3.5, 0 });
 
 bool pressedReload = false;
 bool f2Pressed = false;
 bool pressed = false;
 glm::vec3 backgroundColor = { 0, 0, 0 };
 
+glm::vec4 lightVector = { 0, 0, 0, 1.000 };
+glm::vec3 lightDiffuseColor = { 1, 1, 1 };
+glm::vec3 lightAmbientColor = { 1, 1, 1 };
+glm::vec3 lightSpecularColor = { 1, 1, 1 };
+
 Scene::Scene()
 {
     modelShader_ = ShaderLibrary::LoadShader("default", "resources/shaders/default.vert", "resources/shaders/default.frag");
 
-    model_ = ModelLibrary::LoadModel("sponza", "resources/assets/sponza/sponza.obj");
-    test_ = ModelLibrary::LoadModel("material_test", "resources/asBsets/material_test/material_test.obj");
-    backpack_ = ModelLibrary::LoadModel("backpack", "resources/assets/backpack/backpack.obj");
-    //backpack_ = ModelLibrary::LoadModel("helmet", "resources/assets/damaged_helmet/DamagedHelmet.gltf");
+    sponza_ = ModelLibrary::LoadModel("sponza", "resources/assets/sponza/sponza.obj");
+    sponza_->scale_ = glm::vec3(0.00625f, 0.00625f, 0.00625f);
+
+    backPack_ = ModelLibrary::LoadModel("backpack", "resources/assets/backpack/backpack.obj");
+    backPack_->scale_ = glm::vec3(0.00625f, 0.00625f, 0.00625f);
+
+    test_ = ModelLibrary::LoadModel("material_test", "resources/assets/material_test/material_test.obj");
+
+    helmet_ = ModelLibrary::LoadModel("helmet", "resources/assets/damaged_helmet/DamagedHelmet.gltf");
+
+    activeModel_ = sponza_;
 
     //Shared<Material> m = AssetLibrary::LoadMaterial("pathTest");
     //Shared<Texture> t = AssetLibrary::LoadTexture("pathTest");
@@ -53,13 +70,19 @@ void Scene::OnEvent(Event& event)
 
 void Scene::OnImGuiRender(double time, double dt)
 {
+    ImGui::Begin("Lights");
+    ImGui::DragFloat4("##Lights Position", &lightVector[0], 0.5f, 0, 0, "%.3f");
+    ImGui::ColorEdit3("##Lights Diffuse Color", &lightDiffuseColor[0]);
+    ImGui::ColorEdit3("##Lights Ambient Color", &lightAmbientColor[0]);
+    ImGui::ColorEdit3("##Lights Specular Color", &lightSpecularColor[0]);
+    ImGui::End();
+
     ImGui::Begin("Materials");
 
     std::unordered_set<unsigned int> keys;
     std::vector<Shared<Material>> materials;
 
-
-    for (const Shared<Mesh>& mesh : model_->meshes) {
+    for (const Shared<Mesh>& mesh : activeModel_->meshes) {
         Shared<Material> material = mesh->material_;
         if (keys.find(material->materialId) != keys.end()) {
             continue;
@@ -111,24 +134,25 @@ void Scene::OnImGuiRender(double time, double dt)
             ImGui::Spacing();
             ImGui::Text("Diffuse:");
             ImGui::Image((ImTextureID)textureID, ImVec2(256, 256));
-            ImGui::SliderFloat3("##Diffuse Albedo", &selectedMaterial->diffuseColor[0], 0, 1);
         }
+        ImGui::SliderFloat3("##Diffuse Albedo", &selectedMaterial->diffuseColor[0], 0, 1);
 
         if (selectedMaterial->ambientTexture != nullptr) {
             textureID = selectedMaterial->ambientTexture->id();
             ImGui::Spacing();
             ImGui::Text("Ambient:");
             ImGui::Image((ImTextureID)textureID, ImVec2(256, 256));
-            ImGui::SliderFloat3("##Ambient Ambient", &selectedMaterial->ambientColor[0], 0, 1);
         }
+        ImGui::SliderFloat3("##Ambient Ambient", &selectedMaterial->ambientColor[0], 0, 1);
 
         if (selectedMaterial->specularTexture != nullptr) {
             textureID = selectedMaterial->specularTexture->id();
             ImGui::Spacing();
             ImGui::Text("Specular:");
             ImGui::Image((ImTextureID)textureID, ImVec2(256, 256));
-            ImGui::SliderFloat3("##Specular Specular", &selectedMaterial->specularColor[0], 0, 1);
         }
+        ImGui::SliderFloat3("##Specular Specular", &selectedMaterial->specularColor[0], 0, 1);
+        ImGui::SliderFloat("##Specular Shininess", &selectedMaterial->shininess, 0, 1000);
 
         if (selectedMaterial->normalTexture != nullptr) {
             textureID = selectedMaterial->normalTexture->id();
@@ -137,19 +161,19 @@ void Scene::OnImGuiRender(double time, double dt)
             ImGui::Image((ImTextureID)textureID, ImVec2(256, 256));
         }
 
-        if (selectedMaterial->alphaTexture != nullptr) {
-            textureID = selectedMaterial->alphaTexture->id();
-            ImGui::Spacing();
-            ImGui::Text("Alpha Texture:");
-            ImGui::Image((ImTextureID)textureID, ImVec2(256, 256));
-        }
+        //if (selectedMaterial->alphaTexture != nullptr) {
+        //    textureID = selectedMaterial->alphaTexture->id();
+        //    ImGui::Spacing();
+        //    ImGui::Text("Alpha Texture:");
+        //    ImGui::Image((ImTextureID)textureID, ImVec2(256, 256));
+        //}
 
-        if (selectedMaterial->displacementTexture != nullptr) {
-            textureID = selectedMaterial->displacementTexture->id();
-            ImGui::Spacing();
-            ImGui::Text("Displacement:");
-            ImGui::Image((ImTextureID)textureID, ImVec2(256, 256));
-        }
+        //if (selectedMaterial->displacementTexture != nullptr) {
+        //    textureID = selectedMaterial->displacementTexture->id();
+        //    ImGui::Spacing();
+        //    ImGui::Text("Displacement:");
+        //    ImGui::Image((ImTextureID)textureID, ImVec2(256, 256));
+        //}
     }
 
     ImGui::End();
@@ -173,6 +197,23 @@ void Scene::OnUpdate(double time, double dt)
     if (Input::IsKeyDown(KeyCode::F2)) {
         if (!f2Pressed) {
 
+            modelIndex_ = (modelIndex_ + 1) % 4;
+            std::cout << "Unknown Model: " << modelIndex_ << '\n';
+
+            switch (modelIndex_) {
+            case 0:
+                activeModel_ = sponza_;
+                break;
+            case 1:
+                activeModel_ = backPack_;
+                break;
+            case 2:
+                activeModel_ = helmet_;
+                break;
+            case 3:
+                activeModel_ = test_;
+                break;
+            }
             f2Pressed = true;
         }
     }
@@ -204,7 +245,6 @@ void Scene::OnUpdate(double time, double dt)
     if (Input::IsKeyDown(KeyCode::D)) {
         camera.ProcessKeyboard(RIGHT, dt);
     }
-
 
     static bool firstMouse = false;
     if (Application::instance().isCursorEnabled()) {
@@ -253,11 +293,19 @@ void Scene::OnRender(double time, double dt)
     modelShader_->SetUniformMatrix4f("u_Projection", projection);
     modelShader_->SetUniformMatrix4f("u_View", viewMatrix);
 
-    model_->position_ = glm::vec3(0.0f, 0.0f, 0.0f);
-    model_->rotation_ = glm::quat(glm::radians(glm::vec3(0.0f, 0.0f, 0.0f)));
-    model_->scale_ = glm::vec3(0.00625f, 0.00625f, 0.00625f);
+    modelShader_->SetUniform4f("u_Light.vector", lightVector);
+    modelShader_->SetUniform3f("u_Light.diffuseColor", lightDiffuseColor);
+    modelShader_->SetUniform3f("u_Light.ambientColor", lightAmbientColor);
+    modelShader_->SetUniform3f("u_Light.specularColor", lightSpecularColor);
 
-    model_->Draw(modelShader_);
+    modelShader_->SetUniform3f("u_CameraPos", camera.Position);
+
+    activeModel_->Draw(camera, modelShader_);
+
+    sponza_->scale_ = glm::vec3(1.0 / 65);
+
+    test_->position_ = lightVector;
+    test_->Draw(camera, modelShader_);
 }
 
 void Scene::SetViewport(unsigned int width, unsigned int height)

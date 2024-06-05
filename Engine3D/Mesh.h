@@ -24,8 +24,12 @@ struct Mesh
 
 //private:
 
+    unsigned int type_;
+
     std::vector<VertexData> vertices_;
-    std::vector<unsigned int> indices_;
+    unsigned int size_;
+    //std::vector<unsigned int> indices_;
+
     Shared<Material> material_;
 
     unsigned int VAO, VBO, EBO;

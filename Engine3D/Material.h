@@ -9,59 +9,53 @@ struct Material : public Asset
 {
     void Use(const Shared<Shader>& shader)
     {
-        if (shader->HasUniform("u_Material.ambientColor")) {
-            shader->SetUniform3f("u_Material.ambientColor", ambientColor);
-        }
+        glBindTextureUnit(0, 0);
+        glBindTextureUnit(1, 0);
+        glBindTextureUnit(2, 0);
+        glBindTextureUnit(3, 0);
+        glBindTextureUnit(4, 0);
+        glBindTextureUnit(5, 0);
 
-        if (shader->HasUniform("u_Material.diffuseColor")) {
-            shader->SetUniform3f("u_Material.diffuseColor", diffuseColor);
-        }
+        shader->SetUniform1i("u_Material.diffuseTexture", 0);
+        shader->SetUniform1i("u_Material.ambientTexture", 1);
+        shader->SetUniform1i("u_Material.specularTexture", 2);
+        shader->SetUniform1i("u_Material.normalTexture", 3);
+        shader->SetUniform1i("u_Material.alphaTexture", 4);
+        shader->SetUniform1i("u_Material.displacementTexture", 5);
 
-        if (shader->HasUniform("u_Material.specularColor")) {
-            shader->SetUniform3f("u_Material.specularColor", specularColor);
-        }
+        shader->SetUniform3f("u_Material.ambientColor", ambientColor);
+        shader->SetUniform3f("u_Material.diffuseColor", diffuseColor);
+        shader->SetUniform3f("u_Material.specularColor", specularColor);
+        shader->SetUniform1f("u_Material.shininess", shininess);
 
-        textureSlot = 0;
         if (diffuseTexture != nullptr && shader->HasUniform("u_Material.diffuseTexture"))
         {
-            diffuseTexture->Bind(textureSlot);
-            shader->SetUniform1i("u_Material.diffuseTexture", textureSlot);
-            textureSlot++;
+            diffuseTexture->Bind(0);
         }
 
         if (ambientTexture != nullptr && shader->HasUniform("u_Material.ambientTexture"))
         {
-            ambientTexture->Bind(textureSlot);
-            shader->SetUniform1i("u_Material.ambientTexture", textureSlot);
-            textureSlot++;
+            ambientTexture->Bind(1);
         }
 
         if (specularTexture != nullptr && shader->HasUniform("u_Material.specularTexture"))
         {
-            specularTexture->Bind(textureSlot);
-            shader->SetUniform1i("u_Material.specularTexture", textureSlot);
-            textureSlot++;
+            specularTexture->Bind(2);
         }
 
         if (normalTexture != nullptr && shader->HasUniform("u_Material.normalTexture"))
         {
-            normalTexture->Bind(textureSlot);
-            shader->SetUniform1i("u_Material.normalTexture", textureSlot);
-            textureSlot++;
+            normalTexture->Bind(3);
         }
 
         if (alphaTexture != nullptr && shader->HasUniform("u_Material.alphaTexture"))
         {
-            alphaTexture->Bind(textureSlot);
-            shader->SetUniform1i("u_Material.alphaTexture", textureSlot);
-            textureSlot++;
+            alphaTexture->Bind(4);
         }
 
         if (displacementTexture != nullptr && shader->HasUniform("u_Material.displacementTexture"))
         {
-            displacementTexture->Bind(textureSlot);
-            shader->SetUniform1i("u_Material.displacementTexture", textureSlot);
-            textureSlot++;
+            displacementTexture->Bind(5);
         }
     }
 
@@ -70,7 +64,9 @@ struct Material : public Asset
 
     glm::vec3 ambientColor;
     glm::vec3 diffuseColor;
+
     glm::vec3 specularColor;
+    float shininess;
 
     Shared<Texture> diffuseTexture;
     Shared<Texture> ambientTexture;
@@ -78,8 +74,6 @@ struct Material : public Asset
     Shared<Texture> normalTexture;
     Shared<Texture> alphaTexture;
     Shared<Texture> displacementTexture;
-
-    int textureSlot;
 };
 
 #endif // !MATERIAL_H

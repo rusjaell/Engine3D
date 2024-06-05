@@ -3,10 +3,11 @@
 
 #include "Shader.h"
 #include "Mesh.h"
+#include "Camera.h"
 
 struct Model
 {
-    void Draw(const Shared<Shader>& shader);
+    void Draw(Camera& camera, const Shared<Shader>& shader);
 
     glm::vec3 position_;
     glm::quat rotation_;

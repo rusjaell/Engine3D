@@ -45,7 +45,6 @@ void FrameBuffer::Invalidate()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-
 void FrameBuffer::Bind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, handle_);
@@ -55,6 +54,11 @@ void FrameBuffer::Bind()
 void FrameBuffer::Unbind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+unsigned int FrameBuffer::id() const
+{
+	return handle_;
 }
 
 unsigned int FrameBuffer::colorAttachment() const
