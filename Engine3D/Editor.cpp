@@ -108,6 +108,8 @@ void Editor::OnImGuiRender(double time, double dt)
 
         ImGui::End();
     }
+
+    scene_->OnImGuiRender(time, dt);
 #endif
 }
 
@@ -130,7 +132,9 @@ void Editor::OnRender(double time, double dt)
     glClearColor(backgroundColor_.r, backgroundColor_.g, backgroundColor_.b, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     scene_->OnRender(time, dt);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     viewportFrameBuffer_->Unbind();
 #else
@@ -187,7 +191,7 @@ void Editor::RenderInspector()
 
     ImGui::SetNextWindowClass(&winClass);
     ImGui::Begin("Inspector", 0);
-
+   
     ImGui::End();
 }
 
@@ -199,7 +203,6 @@ void Editor::RenderDebug()
     ImGui::SetNextWindowClass(&winClass);
     ImGui::Begin("Debug", 0);
 
-
     ImGui::Text("FPS: %d, UPS: %d", Application::instance().frames(), Application::instance().updates());
     ImGui::Text("Draws: %d", Application::instance().draws_);
     ImGui::Text("Vertices: %d", Application::instance().vertices);
@@ -207,10 +210,6 @@ void Editor::RenderDebug()
 
     ImGui::Spacing();
     ImGui::ColorEdit3("ClearColor", &backgroundColor_[0], 0);
-
-    bool vSync = Application::instance().vSync();
-    if (ImGui::Checkbox("V-Sync", &vSync)) {
-        Application::instance().SetVSync(vSync);
-    }
+    
     ImGui::End();
 }

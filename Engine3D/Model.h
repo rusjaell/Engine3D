@@ -8,7 +8,11 @@ struct Model
 {
     void Draw(const Shared<Shader>& shader);
 
-    std::vector<Mesh> meshes;
+    glm::vec3 position_;
+    glm::quat rotation_;
+    glm::vec3 scale_;
+
+    std::vector<Shared<Mesh>> meshes;
 };
 
 #endif

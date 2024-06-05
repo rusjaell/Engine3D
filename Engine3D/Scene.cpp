@@ -19,7 +19,7 @@ Shared<Model> backpack_;
 Camera camera({ 0, 0, 0 });
 
 bool pressedReload = false;
-bool vSyncPressed = false;
+bool f2Pressed = false;
 bool pressed = false;
 glm::vec3 backgroundColor = { 0, 0, 0 };
 
@@ -53,26 +53,19 @@ void Scene::OnEvent(Event& event)
 
 void Scene::OnImGuiRender(double time, double dt)
 {
-    ImGui::Begin("Environment");
-    ImGui::Text("FPS: %d UPS: %d DRAW_CALLS: %d VERTICES: %d", Application::instance().frames(), Application::instance().updates(), Application::instance().draws_, Application::instance().vertices);
-    ImGui::SliderFloat3("Background Color", &backgroundColor[0], 0.0, 1.0f);
-    //std::cout << "FPS: " << lastFPS_ << " UPS: " << lastUPS_ << " DRAWS: " << draws_ << " VERTICES: " << vertices << '\n';
-
-    ImGui::End();
-
     ImGui::Begin("Materials");
 
     std::unordered_set<unsigned int> keys;
     std::vector<Shared<Material>> materials;
 
-    for (size_t i = 0; i < model_->meshes.size(); i++)
-    {
-        Shared<Material> material = model_->meshes[i].material_;
+
+    for (const Shared<Mesh>& mesh : model_->meshes) {
+        Shared<Material> material = mesh->material_;
         if (keys.find(material->materialId) != keys.end()) {
             continue;
         }
         keys.insert(material->materialId);
-        materials.push_back(model_->meshes[i].material_);
+        materials.push_back(material);
     }
 
     std::vector<std::string> materialNames;
@@ -178,15 +171,14 @@ void Scene::OnUpdate(double time, double dt)
     }
 
     if (Input::IsKeyDown(KeyCode::F2)) {
-        if (!vSyncPressed) {
-            bool vSync = Application::instance().vSync();
-            Application::instance().SetVSync(!vSync);
-            vSyncPressed = true;
+        if (!f2Pressed) {
+
+            f2Pressed = true;
         }
     }
 
     if (Input::IsKeyUp(KeyCode::F2)) {
-        vSyncPressed = false;
+        f2Pressed = false;
     }
 
     if (Input::IsKeyDown(KeyCode::Esc)) {
@@ -260,34 +252,12 @@ void Scene::OnRender(double time, double dt)
     modelShader_->Use();
     modelShader_->SetUniformMatrix4f("u_Projection", projection);
     modelShader_->SetUniformMatrix4f("u_View", viewMatrix);
-    
-    glm::mat4 model(1.0);
 
-    glm::vec3 pos(0, 0, 0);
-
-    model = glm::translate(model, glm::vec3(0, 0, 0));
-    model = glm::scale(model, glm::vec3{ 0.00625f });
-    modelShader_->SetUniformMatrix4f("u_Model", model);
+    model_->position_ = glm::vec3(0.0f, 0.0f, 0.0f);
+    model_->rotation_ = glm::quat(glm::radians(glm::vec3(0.0f, 0.0f, 0.0f)));
+    model_->scale_ = glm::vec3(0.00625f, 0.00625f, 0.00625f);
 
     model_->Draw(modelShader_);
-
-    for (int x = 0; x < 8; x++) {
-        for (int y = 0; y < 8; y++) {
-            for (int z = 0; z < 8; z++) {
-
-                glm::vec3 pos(x - 4, y + 12, z - 4);
-
-                model = glm::mat4(1.0);
-                model = glm::translate(model, pos);
-                model = glm::scale(model, glm::vec3{ 0.00625f / 4 });
-                //model = glm::scale(model, glm::vec3{ 0.5f / 4 });
-
-                modelShader_->SetUniformMatrix4f("u_Model", model);
-
-                backpack_->Draw(modelShader_);
-            }
-        }
-    }
 }
 
 void Scene::SetViewport(unsigned int width, unsigned int height)

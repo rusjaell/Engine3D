@@ -23,8 +23,8 @@ Shared<Model> ModelLibrary::LoadModel(const std::string& name, const std::string
     }
 
     Assimp::Importer import;
-    //const aiScene * scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices); //| aiProcess_FlipUVs);
-    const aiScene * scene = import.ReadFile(path, aiProcess_Triangulate);
+    const aiScene * scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_JoinIdenticalVertices); //| aiProcess_FlipUVs);
+    //const aiScene * scene = import.ReadFile(path, aiProcess_Triangulate);
     //const aiScene * scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
@@ -56,7 +56,7 @@ void ModelLibrary::ProcessNode(const std::string& directory, const Shared<Model>
     }
 }
 
-Mesh ModelLibrary::ProcessMesh(const std::string& directory, const Shared<Model>& model, aiMesh* mesh, const aiScene* scene)
+Shared<Mesh> ModelLibrary::ProcessMesh(const std::string& directory, const Shared<Model>& model, aiMesh* mesh, const aiScene* scene)
 {
     std::vector<VertexData> vertices;
     std::vector<unsigned int> indices;
@@ -215,9 +215,8 @@ Mesh ModelLibrary::ProcessMesh(const std::string& directory, const Shared<Model>
         std::cout << "No Material " << '\n';
         assert(false);
     }
-
-    // return a mesh object created from the extracted mesh data
-    return Mesh(vertices, indices, m);
+    
+    return MakeShared<Mesh>(vertices, indices, m);
 }
 
 Shared<Texture> ModelLibrary::LoadTexture(const std::string& directory, aiMaterial* material, aiTextureType type, std::string typeName)

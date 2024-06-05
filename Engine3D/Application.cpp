@@ -19,8 +19,6 @@ Application::Application(const char* title, unsigned int width, unsigned int hei
 
 	imGUIDebug_ = new ImGUIDebug();
 	scene_ = new Editor();
-
-	SetVSync(false);
 }
 
 Application::~Application()
@@ -32,6 +30,8 @@ Application::~Application()
 
 void Application::Run()
 {
+	glfwSwapInterval(0);
+
 	const double UPS = 60.0; // Updates per second
 
 	const double updateInterval = 1.0 / UPS; // Fixed update interval
@@ -115,12 +115,6 @@ void Application::OnEvent(Event& e)
 Window& Application::window()
 {
 	return *window_;
-}
-
-void Application::SetVSync(bool enabled)
-{
-	vSync_ = enabled;
-	glfwSwapInterval(enabled ? 0 : 1);
 }
 
 void Application::ToggleCursor()

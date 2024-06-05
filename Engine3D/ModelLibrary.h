@@ -17,7 +17,7 @@ public:
 
 private:
     static void ProcessNode(const std::string& directory, const Shared<Model>& model, aiNode* node, const aiScene* scene);
-    static Mesh ProcessMesh(const std::string& directory, const Shared<Model>& model, aiMesh* mesh, const aiScene* scene);
+    static Shared<Mesh> ProcessMesh(const std::string& directory, const Shared<Model>& model, aiMesh* mesh, const aiScene* scene);
     static Shared<Texture> LoadTexture(const std::string& directory, aiMaterial* material, aiTextureType type, std::string typeName);
 
 private:

@@ -22,13 +22,11 @@ struct Mesh
 
     void Draw(const Shared< Shader>& shader);
 
-    void CalculateAABB();
-
 //private:
+
     std::vector<VertexData> vertices_;
     std::vector<unsigned int> indices_;
     Shared<Material> material_;
-    AABB aabb_;
 
     unsigned int VAO, VBO, EBO;
 };

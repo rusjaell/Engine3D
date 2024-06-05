@@ -108,7 +108,7 @@ void Shader::Unbind() const
 
 bool Shader::HasUniform(const std::string& name)
 {
-	int location = glGetUniformLocation(handle_, name.c_str());
+	int location = GetUniformLocation(name); // glGetUniformLocation(handle_, name.c_str());
 	return location != -1;
 }
 

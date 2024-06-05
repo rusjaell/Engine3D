@@ -22,10 +22,6 @@ public:
 	int updates() const { return lastUPS_; }
 	double time() const { return time_; }
 
-	bool vSync() const { return vSync_; }
-
-	void SetVSync(bool enabled);
-
 	static Application& instance() {
 		return *instance_;
 	}
@@ -45,8 +41,6 @@ private:
 	ImGUIDebug* imGUIDebug_;
 	Editor* scene_;
 	bool isRunning_;
-
-	bool vSync_;
 
 	double time_;
 	int lastFPS_;
