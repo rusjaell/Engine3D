@@ -15,17 +15,23 @@ Application::Application(const char* title, unsigned int width, unsigned int hei
 	instance_ = this;
 
 	window_ = new Window(title, width, height);
-	window_->SetEventCallback(BIND_FN(Application::OnEvent));
+	window_->SetEventCallback(BIND_FN(Application::OnEventCallback));
 
 	imGUIDebug_ = new ImGUIDebug();
-	scene_ = new Editor();
 }
 
 Application::~Application()
 {
 	delete imGUIDebug_;
-	delete scene_;
 	delete window_;
+}
+
+void Application::OnEventCallback(Event& e)
+{
+	imGUIDebug_->OnEvent(e);
+	if (e.handled_)
+		return;
+	OnEvent(e);
 }
 
 void Application::Run()
@@ -66,15 +72,15 @@ void Application::Run()
 		fpsTimer += deltaTime;
 
 		while (accumulator >= updateInterval) {
-			scene_->OnUpdate(time_, updateInterval);
+			OnUpdate(time_, updateInterval);
 			accumulator -= updateInterval; // Decrease the accumulator
 			updateCount++; // Increment update counter
 		}
 
-		scene_->OnRender(time_, deltaTime);
+		OnRender(time_, deltaTime);
 
 		imGUIDebug_->Begin();
-		scene_->OnImGuiRender(time_, deltaTime);
+		OnImGuiRender(time_, deltaTime);
 		imGUIDebug_->End();
 		
 		frameCount++;
@@ -103,14 +109,6 @@ void Application::Run()
 void Application::Stop()
 {
 	isRunning_ = false;
-}
-
-void Application::OnEvent(Event& e)
-{
-	imGUIDebug_->OnEvent(e);
-	if (e.handled_)
-		return;
-	scene_->OnEvent(e);
 }
 
 Window& Application::window()

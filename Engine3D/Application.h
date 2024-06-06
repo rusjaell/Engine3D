@@ -14,7 +14,13 @@ public:
 
 	void Run();
 	void Stop();
-	void OnEvent(Event& e);
+
+	void OnEventCallback(Event& e);
+
+	virtual void OnEvent(Event& event) = 0;
+	virtual void OnImGuiRender(double time, double dt) = 0;
+	virtual void OnUpdate(double time, double dt) = 0;
+	virtual void OnRender(double time, double dt) = 0;
 
 	Window& window();
 
@@ -35,12 +41,15 @@ public:
 	static int draws_;
 	static int vertices;
 
-private:
-	double lastFrameTime_;
+protected:
 	Window* window_;
+	
+private:
 	ImGUIDebug* imGUIDebug_;
-	Editor* scene_;
+	
 	bool isRunning_;
+
+	double lastFrameTime_;
 
 	double time_;
 	int lastFPS_;

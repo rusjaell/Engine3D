@@ -187,7 +187,6 @@
     <ClCompile Include="AssetLibrary.cpp" />
     <ClCompile Include="Buffers.cpp" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="Editor.cpp" />
     <ClCompile Include="Event.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="Light.cpp" />
@@ -268,7 +267,6 @@
     <ClInclude Include="AssetLibrary.h" />
     <ClInclude Include="Buffers.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="Editor.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="FrameBuffer.h" />

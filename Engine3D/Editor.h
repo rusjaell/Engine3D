@@ -1,20 +1,20 @@
 #ifndef EDITOR_H
 #define EDITOR_H
 
-#include "Event.h"
+#include "Scene.h"
 #include "FrameBuffer.h"
+#include "Application.h"
 
-class Scene;
-class Editor
+class Editor : public Application
 {
 public:
-	Editor();
+	Editor(const char* title, unsigned int width, unsigned int height);
 	~Editor();
 
-	void OnEvent(Event& event);
-	void OnImGuiRender(double time, double dt);
-	void OnUpdate(double time, double dt);
-	void OnRender(double time, double dt);
+	virtual void OnEvent(Event& event) override;
+	virtual void OnImGuiRender(double time, double dt) override;
+	virtual void OnUpdate(double time, double dt) override;
+	virtual void OnRender(double time, double dt) override;
 
 	void RenderScene(double time, double dt);
 

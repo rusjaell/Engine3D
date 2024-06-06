@@ -149,9 +149,6 @@
     <ClCompile Include="Shader.cpp">
       <Filter>Source Files\Engine\Assets</Filter>
     </ClCompile>
-    <ClCompile Include="Editor.cpp">
-      <Filter>Source Files\Editor</Filter>
-    </ClCompile>
     <ClCompile Include="Scene.cpp">
       <Filter>Source Files\Engine\Runtime</Filter>
     </ClCompile>
@@ -260,9 +257,6 @@
     </ClInclude>
     <ClInclude Include="Shader.h">
       <Filter>Source Files\Engine\Assets</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor.h">
-      <Filter>Source Files\Editor</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
       <Filter>Source Files\Engine\Runtime</Filter>

@@ -1,19 +1,16 @@
 #include "pch.h"
 #include "Editor.h"
-#include "Application.h"
-#include "Scene.h"
 
-Editor::Editor()
+Editor::Editor(const char* title, unsigned int width, unsigned int height)
+    : Application(title, width, height), viewportSize_({})
 {
-    Application& app = Application::instance();
-
     FrameBufferSpecification spec;
     spec.clearColor = glm::vec4(0, 0, 0, 1);
     spec.clearBit = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
     viewportFrameBuffer_ = MakeShared<FrameBuffer>(spec);
     
     scene_ = new Scene();
-    scene_->SetViewport(app.window().width(), app.window().height());
+    scene_->SetViewport(window_->width(), window_->height());
 }
 
 Editor::~Editor()

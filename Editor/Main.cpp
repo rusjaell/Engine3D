@@ -1,8 +1,9 @@
 #include "Engine.h"
+#include "Editor.h"
 
 int main(int arvc, char** args)
 {
-	Application* application = new Application("Editor", 1280, 720);
+	Editor* application = new Editor("Editor", 1280, 720);
 	application->Run();
 	delete application;
 	return 0;
