@@ -16,18 +16,21 @@ public:
 	void OnUpdate(double time, double dt);
 	void OnRender(double time, double dt);
 
+	void RenderScene(double time, double dt);
+
 private:
 	void RenderViewport();
 	void RenderHierarchy();
 	void RenderConsole();
 	void RenderInspector();
 	void RenderDebug();
+	void RenderContent();
 
 private:
 	Scene* scene_;
 
 	glm::vec2 viewportSize_;
-	Shared< FrameBuffer> viewportFrameBuffer_;
+	Shared<FrameBuffer> viewportFrameBuffer_;
 
 	glm::vec3 backgroundColor_ = { 0.2, 0.2, 0.2 };
 };

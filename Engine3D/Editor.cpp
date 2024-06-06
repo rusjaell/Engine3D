@@ -8,6 +8,8 @@ Editor::Editor()
     Application& app = Application::instance();
 
     FrameBufferSpecification spec;
+    spec.clearColor = glm::vec4(0, 0, 0, 1);
+    spec.clearBit = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
     viewportFrameBuffer_ = MakeShared<FrameBuffer>(spec);
     
     scene_ = new Scene();
@@ -24,7 +26,6 @@ void Editor::OnEvent(Event& event)
 
 void Editor::OnImGuiRender(double time, double dt)
 {
-#ifdef _DEBUG
     static bool dockspaceOpen = true;
     static bool opt_fullscreen_persistant = true;
     bool opt_fullscreen = opt_fullscreen_persistant;
@@ -90,6 +91,7 @@ void Editor::OnImGuiRender(double time, double dt)
                 ImGui::DockBuilderDockWindow("Hierarchy", hierarchy_node_id);
                 ImGui::DockBuilderDockWindow("Inspector", inspector_node_id);
                 ImGui::DockBuilderDockWindow("Debug", debug_node_id);
+                ImGui::DockBuilderDockWindow("Content", console_node_id);
                 ImGui::DockBuilderDockWindow("Console", console_node_id);
 
                 ImGui::DockBuilderFinish(dockspace_id);
@@ -106,12 +108,12 @@ void Editor::OnImGuiRender(double time, double dt)
         RenderConsole();
         RenderInspector();
         RenderDebug();
+        RenderContent();
 
         ImGui::End();
     }
 
     scene_->OnImGuiRender(time, dt);
-#endif
 }
 
 void Editor::OnUpdate(double time, double dt)
@@ -121,29 +123,20 @@ void Editor::OnUpdate(double time, double dt)
 
 void Editor::OnRender(double time, double dt)
 {
-#ifdef _DEBUG
     FrameBufferSpecification spec = viewportFrameBuffer_->specification();
     if (viewportSize_.x > 0.0f && viewportSize_.y > 0.0f && (spec.width != viewportSize_.x || spec.height != viewportSize_.y)) {
         viewportFrameBuffer_->Resize(viewportSize_.x, viewportSize_.y);
         scene_->SetViewport(viewportSize_.x, viewportSize_.y);
     }
 
+    RenderScene(time, dt);
+}
+
+void Editor::RenderScene(double time, double dt)
+{
     viewportFrameBuffer_->Bind();
-
-    glClearColor(backgroundColor_.r, backgroundColor_.g, backgroundColor_.b, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     scene_->OnRender(time, dt);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
     viewportFrameBuffer_->Unbind();
-#else
-    glClearColor(backgroundColor_.r, backgroundColor_.g, backgroundColor_.b, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    scene_->OnRender(time, dt);
-#endif
 }
 
 void Editor::RenderViewport()
@@ -210,7 +203,21 @@ void Editor::RenderDebug()
     ImGui::Text("Triangles: %d", Application::instance().vertices / 3);
 
     ImGui::Spacing();
-    ImGui::ColorEdit3("ClearColor", &backgroundColor_[0], 0);
+
+    FrameBufferSpecification& spec = viewportFrameBuffer_->specification();
+
+    ImGui::ColorEdit4("ClearColor", &spec.clearColor[0]);
     
+    ImGui::End();
+}
+
+void Editor::RenderContent()
+{
+    ImGuiWindowClass winClass;
+    winClass.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoWindowMenuButton;
+
+    ImGui::SetNextWindowClass(&winClass);
+    ImGui::Begin("Content", 0);
+
     ImGui::End();
 }

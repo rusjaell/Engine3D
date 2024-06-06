@@ -16,6 +16,7 @@ Shared<Model> sponza_;
 Shared<Model> backPack_;
 Shared<Model> helmet_;
 Shared<Model> test_;
+Shared<Model> breakfast_;
 
 int modelIndex_;
 
@@ -46,6 +47,8 @@ Scene::Scene()
     test_ = ModelLibrary::LoadModel("material_test", "resources/assets/material_test/material_test.obj");
 
     helmet_ = ModelLibrary::LoadModel("helmet", "resources/assets/damaged_helmet/DamagedHelmet.gltf");
+
+    breakfast_ = ModelLibrary::LoadModel("breakfast", "resources/assets/breakfast_room/breakfast_room.obj");
 
     activeModel_ = sponza_;
 
@@ -197,7 +200,7 @@ void Scene::OnUpdate(double time, double dt)
     if (Input::IsKeyDown(KeyCode::F2)) {
         if (!f2Pressed) {
 
-            modelIndex_ = (modelIndex_ + 1) % 4;
+            modelIndex_ = (modelIndex_ + 1) % 5;
             std::cout << "Unknown Model: " << modelIndex_ << '\n';
 
             switch (modelIndex_) {
@@ -212,6 +215,9 @@ void Scene::OnUpdate(double time, double dt)
                 break;
             case 3:
                 activeModel_ = test_;
+                break;
+            case 4:
+                activeModel_ = breakfast_;
                 break;
             }
             f2Pressed = true;
@@ -277,9 +283,6 @@ void Scene::OnUpdate(double time, double dt)
 
 void Scene::OnRender(double time, double dt)
 {
-    //glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, 1.0f);
-    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     float fov = glm::radians(camera.Zoom);
     float aspectRatio = (float)width_ / height_;
     float nearClip = 0.1f; // Near clipping plane

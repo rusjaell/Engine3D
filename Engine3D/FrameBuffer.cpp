@@ -48,6 +48,10 @@ void FrameBuffer::Invalidate()
 void FrameBuffer::Bind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, handle_);
+
+	glClearColor(specification_.clearColor.r, specification_.clearColor.g, specification_.clearColor.b, specification_.clearColor.a);
+	glClear(specification_.clearBit);
+
 	glViewport(0, 0, specification_.width, specification_.height);
 }
 
@@ -71,7 +75,7 @@ unsigned int FrameBuffer::depthAttachment() const
 	return depthAttachment_;
 }
 
-const FrameBufferSpecification& FrameBuffer::specification() const
+FrameBufferSpecification& FrameBuffer::specification() 
 {
 	return specification_;
 }
