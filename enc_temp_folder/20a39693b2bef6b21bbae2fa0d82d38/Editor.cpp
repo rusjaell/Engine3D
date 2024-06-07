@@ -366,11 +366,6 @@ void Editor::RenderAssetListTreeView(const Shared<DirectoryCacheEntry>& entry)
 
             ImGui::TreePop();
         }
-        else {
-            if (ImGui::IsItemClicked()) {
-                activeEntry_ = nextEntry;
-            }
-        }
     }
 
     style.IndentSpacing = originalIndentSpacing;
