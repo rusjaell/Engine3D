@@ -401,7 +401,6 @@ void Editor::RenderAssetListContent()
     ImGui::Columns(columnCount, 0, false);
 
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-    ImGui::PushStyleVar(ImGuiStyleVar_::ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
     for (const Shared<FileEntry>& fileEntry : activeEntry_->files) {
 
         unsigned int id = viewportFrameBuffer_->colorAttachment();
@@ -413,7 +412,6 @@ void Editor::RenderAssetListContent()
         ImGui::NextColumn();
     }
     ImGui::PopStyleColor();
-    ImGui::PopStyleVar();
 
     ImGui::Columns(1);
 

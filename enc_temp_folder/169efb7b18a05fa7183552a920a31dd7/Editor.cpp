@@ -406,7 +406,7 @@ void Editor::RenderAssetListContent()
 
         unsigned int id = viewportFrameBuffer_->colorAttachment();
 
-        ImGui::ImageButton((void*)id, { cellSize, cellSize }, { 0, 1 }, { 1, 0 });
+        ImGui::ImageButton((void*)id, { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
 
         ImGui::TextWrapped(fileEntry->name.c_str());
 

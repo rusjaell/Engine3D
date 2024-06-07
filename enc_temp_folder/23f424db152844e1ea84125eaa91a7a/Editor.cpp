@@ -400,20 +400,18 @@ void Editor::RenderAssetListContent()
 
     ImGui::Columns(columnCount, 0, false);
 
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-    ImGui::PushStyleVar(ImGuiStyleVar_::ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
     for (const Shared<FileEntry>& fileEntry : activeEntry_->files) {
 
         unsigned int id = viewportFrameBuffer_->colorAttachment();
 
-        ImGui::ImageButton((void*)id, { cellSize, cellSize }, { 0, 1 }, { 1, 0 });
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+        ImGui::ImageButton((void*)id, { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+        ImGui::PopStyleColor();
 
         ImGui::TextWrapped(fileEntry->name.c_str());
 
         ImGui::NextColumn();
     }
-    ImGui::PopStyleColor();
-    ImGui::PopStyleVar();
 
     ImGui::Columns(1);
 

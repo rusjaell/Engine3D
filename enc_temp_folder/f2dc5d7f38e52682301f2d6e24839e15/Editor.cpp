@@ -383,8 +383,17 @@ void Editor::RenderAssetListContent()
         return;
     }
 
-    ImGui::BeginChild("##Content ListContent");
+    for (const Shared<FileEntry>& fileEntry : activeEntry_->files) {
 
+        unsigned int id = viewportFrameBuffer_->colorAttachment();
+
+        ImGui::TextWrapped(fileEntry->name.c_str());
+
+        ImGui::NextColumn();
+    }
+
+    ImGui::BeginChild("##Content ListContent");
+    
     static float thumbnailSize = 96.0f;
     static float padding = 0.0f;
 

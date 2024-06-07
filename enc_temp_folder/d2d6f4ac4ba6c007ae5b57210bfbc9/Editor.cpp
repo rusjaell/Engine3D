@@ -366,6 +366,11 @@ void Editor::RenderAssetListTreeView(const Shared<DirectoryCacheEntry>& entry)
 
             ImGui::TreePop();
         }
+        else {
+            if (ImGui::IsItemClicked()) {
+                activeEntry_ = nextEntry;
+            }
+        }
     }
 
     style.IndentSpacing = originalIndentSpacing;
@@ -380,10 +385,13 @@ void Editor::RenderAssetListContent()
 
     ImGui::BeginChild("##Content ListContent");
 
-    ImGui::Text("Contents of: %s", activeEntry_->name.c_str());
+    static float thumbnailSize = 96.0f;
+    static float padding = 0.0f;
 
-    static float thumbnailSize = 64.0f;
-    float cellSize = thumbnailSize;
+    ImGui::SliderFloat("Thumbnail Size", &thumbnailSize, 16, 512);
+    ImGui::SliderFloat("Padding", &padding, 0, 32);
+
+    float cellSize = thumbnailSize + padding;
 
     float panelWidth = ImGui::GetContentRegionAvailWidth();
     int columnCount = (int)(panelWidth / cellSize);
@@ -392,18 +400,20 @@ void Editor::RenderAssetListContent()
 
     ImGui::Columns(columnCount, 0, false);
 
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+    ImGui::PushStyleVar(ImGuiStyleVar_::ImGuiStyleVar_ItemSpacing, ImVec2(2, 2));
     for (const Shared<FileEntry>& fileEntry : activeEntry_->files) {
 
         unsigned int id = viewportFrameBuffer_->colorAttachment();
 
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-        ImGui::ImageButton((void*)id, { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
-        ImGui::PopStyleColor();
+        ImGui::ImageButton((void*)id, { cellSize, cellSize }, { 0, 1 }, { 1, 0 });
 
         ImGui::TextWrapped(fileEntry->name.c_str());
 
         ImGui::NextColumn();
     }
+    ImGui::PopStyleColor();
+    ImGui::PopStyleVar();
 
     ImGui::Columns(1);
 
