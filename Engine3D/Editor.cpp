@@ -46,6 +46,9 @@ Editor::Editor(const char* title, unsigned int width, unsigned int height)
     colors[ImGuiCol_TitleBg] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
     colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
     colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+
+    directoryCache_.InitializeRoot("assets");
+    directoryCache_.Print();
 }
 
 Editor::~Editor()
@@ -123,7 +126,7 @@ void Editor::OnImGuiRender(double time, double dt)
                 ImGuiID debug_node_id = ImGui::DockBuilderSplitNode(inspector_node_id, ImGuiDir_Down, 0.25f, NULL, &inspector_node_id);
                 ImGuiID console_node_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Down, 0.25f, NULL, &dockspace_id);
 
-                ImGui::DockBuilderDockWindow("Viewport", dockspace_id);
+                ImGui::DockBuilderDockWindow("###SceneViewport", dockspace_id);
                 ImGui::DockBuilderDockWindow("Hierarchy", hierarchy_node_id);
                 ImGui::DockBuilderDockWindow("Inspector", inspector_node_id);
                 ImGui::DockBuilderDockWindow("Debug", debug_node_id);
@@ -185,7 +188,16 @@ void Editor::RenderViewport()
     winClass.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoWindowMenuButton;
 
     ImGui::SetNextWindowClass(&winClass);
-    ImGui::Begin("Viewport", 0);
+
+    // Get the animated character based on the time and frame count
+    char animationChar = "|/-\\"[(int)(ImGui::GetTime() / 0.25f) & 3];
+    int frameCount = ImGui::GetFrameCount();
+
+    // Create a stringstream to construct the string
+    std::stringstream ss;
+    ss << "Scene " << animationChar << " " << frameCount << "###SceneViewport";
+
+    ImGui::Begin(ss.str().c_str(), 0);
 
     ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
     viewportSize_ = { viewportPanelSize.x, viewportPanelSize.y };
@@ -241,21 +253,21 @@ void Editor::RenderDebug()
     ImGuiWindowClass winClass;
     winClass.DockNodeFlagsOverrideSet = ImGuiDockNodeFlags_NoWindowMenuButton;
 
-    ImGui::SetNextWindowClass(&winClass);
-    ImGui::Begin("Debug", 0);
+ImGui::SetNextWindowClass(&winClass);
+ImGui::Begin("Debug", 0);
 
-    ImGui::Text("FPS: %d, UPS: %d", Application::instance().frames(), Application::instance().updates());
-    ImGui::Text("Draws: %d", Application::instance().draws_);
-    ImGui::Text("Vertices: %d", Application::instance().vertices);
-    ImGui::Text("Triangles: %d", Application::instance().vertices / 3);
+ImGui::Text("FPS: %d, UPS: %d", Application::instance().frames(), Application::instance().updates());
+ImGui::Text("Draws: %d", Application::instance().draws_);
+ImGui::Text("Vertices: %d", Application::instance().vertices);
+ImGui::Text("Triangles: %d", Application::instance().vertices / 3);
 
-    ImGui::Spacing();
+ImGui::Spacing();
 
-    FrameBufferSpecification& spec = viewportFrameBuffer_->specification();
+FrameBufferSpecification& spec = viewportFrameBuffer_->specification();
 
-    ImGui::ColorEdit4("ClearColor", &spec.clearColor[0]);
-    
-    ImGui::End();
+ImGui::ColorEdit4("ClearColor", &spec.clearColor[0]);
+
+ImGui::End();
 }
 
 void Editor::RenderContent()
@@ -312,53 +324,47 @@ void Editor::RenderAssetList()
 {
     ImGui::BeginChild("##Content List");
 
-    RenderAssetListTreeView("assets");
+    RenderAssetListTreeView(directoryCache_.root);
 
     ImGui::EndChild();
 }
 
 #include <filesystem>
 
-namespace fs = std::filesystem;
+Shared<DirectoryCacheEntry> activeEntry_;
 
-std::string selectedDirectory_;
-
-void Editor::RenderAssetListTreeView(const std::string& directory) {
-
-
+void Editor::RenderAssetListTreeView(const Shared<DirectoryCacheEntry>& entry)
+{
     ImGuiStyle& style = ImGui::GetStyle();
-    float originalIndentSpacing = style.IndentSpacing; // Store the original indent spacing
-    style.IndentSpacing = 16; // Set your desired indent size
+    float originalIndentSpacing = style.IndentSpacing;
+    style.IndentSpacing = 16;
 
-    // Your ImGui rendering code here
-
-    // Restore the original indent spacing after rendering
-
-    for (const auto& entry : fs::directory_iterator(directory))
+    for (const Shared<DirectoryCacheEntry>& nextEntry : entry->entries)
     {
-        const fs::path& entryPath = entry.path();
+        const std::string& filePath = nextEntry->path.string();
+        const std::string& fileName = nextEntry->name;
 
-        const std::string& filePath = entryPath.string();
-        const std::string& fileName = entryPath.filename().string();
+        bool selected = activeEntry_ == nextEntry;
 
-        bool selected = selectedDirectory_ == filePath;
+        ImGui::AlignTextToFramePadding();
 
-        if (fs::is_directory(entry))
-        {
-            ImGui::AlignTextToFramePadding();
+        int flags = ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_OpenOnArrow;
+        if (selected) {
+            flags |= ImGuiTreeNodeFlags_Selected;
+        }
+        if (nextEntry->entries.size() == 0){
+            flags |= ImGuiTreeNodeFlags_::ImGuiTreeNodeFlags_Leaf;
+        }
 
-            int flags = ImGuiTreeNodeFlags_SpanFullWidth;
-            if (selected) {
-                flags |= ImGuiTreeNodeFlags_Selected;
+        if (ImGui::TreeNodeEx(fileName.c_str(), flags)) {
+
+            if (ImGui::IsItemClicked()) {
+                activeEntry_ = nextEntry;
             }
 
-            if (ImGui::TreeNodeEx(fileName.c_str(), flags)) {
-                if (ImGui::IsItemClicked()) {
-                    selectedDirectory_ = filePath;
-                }
-                RenderAssetListTreeView(filePath);
-                ImGui::TreePop();
-            }
+            RenderAssetListTreeView(nextEntry);
+
+            ImGui::TreePop();
         }
     }
 
@@ -368,7 +374,39 @@ void Editor::RenderAssetListTreeView(const std::string& directory) {
 
 void Editor::RenderAssetListContent()
 {
-    ImGui::Text("Column 2 - Row 1");
-    ImGui::Text("Column 2 - Row 2");
-    ImGui::Text("Column 2 - Row 3");
+    if (activeEntry_ == nullptr) {
+        return;
+    }
+
+    ImGui::BeginChild("##Content ListContent");
+
+    ImGui::Text("Contents of: %s", activeEntry_->name.c_str());
+
+    static float thumbnailSize = 64.0f;
+    float cellSize = thumbnailSize;
+
+    float panelWidth = ImGui::GetContentRegionAvailWidth();
+    int columnCount = (int)(panelWidth / cellSize);
+    if (columnCount < 1)
+        columnCount = 1;
+
+    ImGui::Columns(columnCount, 0, false);
+
+    for (const Shared<FileEntry>& fileEntry : activeEntry_->files) {
+
+        unsigned int id = viewportFrameBuffer_->colorAttachment();
+
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+        ImGui::ImageButton((void*)id, { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
+        ImGui::PopStyleColor();
+
+        ImGui::TextWrapped(fileEntry->name.c_str());
+
+        ImGui::NextColumn();
+    }
+
+    ImGui::Columns(1);
+
+    ImGui::EndChild();
 }
+

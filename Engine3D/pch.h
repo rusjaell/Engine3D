@@ -1,5 +1,6 @@
 #pragma once
 
+#include <sstream>
 #include <array>
 #include <regex>
 #include <iostream>
