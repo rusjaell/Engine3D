@@ -136,6 +136,7 @@ void Editor::OnImGuiRender(double time, double dt)
 
         ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0.35));
 
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 
         RenderViewport();
@@ -148,6 +149,7 @@ void Editor::OnImGuiRender(double time, double dt)
         RenderDebug();
         RenderContent();
 
+        ImGui::PopStyleVar();
         ImGui::PopStyleColor();
 
         ImGui::End();

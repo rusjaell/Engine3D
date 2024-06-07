@@ -136,8 +136,10 @@ void Editor::OnImGuiRender(double time, double dt)
 
         ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0.35));
 
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2 { 0, 0 });
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_::ImGuiStyleVar_FramePadding, ImVec2(16, 16));
+        
         RenderViewport();
 
         ImGui::PopStyleVar();
@@ -148,6 +150,7 @@ void Editor::OnImGuiRender(double time, double dt)
         RenderDebug();
         RenderContent();
 
+        ImGui::PopStyleVar(2);
         ImGui::PopStyleColor();
 
         ImGui::End();

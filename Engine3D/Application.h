@@ -10,7 +10,7 @@ class Application
 {
 public:
 	Application(const char* title, unsigned int width, unsigned int height);
-	~Application();
+	virtual ~Application();
 
 	void Run();
 	void Stop();
