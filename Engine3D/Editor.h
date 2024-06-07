@@ -16,15 +16,21 @@ public:
 	virtual void OnUpdate(double time, double dt) override;
 	virtual void OnRender(double time, double dt) override;
 
+private:
 	void RenderScene(double time, double dt);
 
-private:
+	// ImGUI
 	void RenderViewport();
 	void RenderHierarchy();
 	void RenderConsole();
 	void RenderInspector();
 	void RenderDebug();
+	
+	// Content
 	void RenderContent();
+	void RenderAssetList();
+	void RenderAssetListContent();
+	void RenderAssetListTreeView(const std::string& directory);
 
 private:
 	Scene* scene_;

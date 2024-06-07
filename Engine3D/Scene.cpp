@@ -36,19 +36,19 @@ glm::vec3 lightSpecularColor = { 1, 1, 1 };
 
 Scene::Scene()
 {
-    modelShader_ = ShaderLibrary::LoadShader("default", "resources/shaders/default.vert", "resources/shaders/default.frag");
+    modelShader_ = ShaderLibrary::LoadShader("default", "assets/shaders/default.vert", "assets/shaders/default.frag");
 
-    sponza_ = ModelLibrary::LoadModel("sponza", "resources/assets/sponza/sponza.obj");
+    sponza_ = ModelLibrary::LoadModel("sponza", "assets/models/sponza/sponza.obj");
     sponza_->scale_ = glm::vec3(0.00625f, 0.00625f, 0.00625f);
 
-    backPack_ = ModelLibrary::LoadModel("backpack", "resources/assets/backpack/backpack.obj");
+    backPack_ = ModelLibrary::LoadModel("backpack", "assets/models/backpack/backpack.obj");
     backPack_->scale_ = glm::vec3(0.00625f, 0.00625f, 0.00625f);
 
-    test_ = ModelLibrary::LoadModel("material_test", "resources/assets/material_test/material_test.obj");
+    test_ = ModelLibrary::LoadModel("material_test", "assets/models/material_test/material_test.obj");
 
-    helmet_ = ModelLibrary::LoadModel("helmet", "resources/assets/damaged_helmet/DamagedHelmet.gltf");
+    helmet_ = ModelLibrary::LoadModel("helmet", "assets/models/damaged_helmet/DamagedHelmet.gltf");
 
-    breakfast_ = ModelLibrary::LoadModel("breakfast", "resources/assets/breakfast_room/breakfast_room.obj");
+    breakfast_ = ModelLibrary::LoadModel("breakfast", "assets/models/breakfast_room/breakfast_room.obj");
 
     activeModel_ = sponza_;
 
