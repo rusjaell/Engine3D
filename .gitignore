@@ -1045,6 +1045,8 @@ dkms.conf
 # Raspberry Pi Pico disassembler file
 *.dis
 
+# My Custom Defines
+enc_temp_folder
 !Dependencies/
 !Dependencies/**
 !Engine3D/Resources/
